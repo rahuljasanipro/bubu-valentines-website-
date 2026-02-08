@@ -1,7 +1,7 @@
 const config = window.VALENTINE_CONFIG || {};
 document.title = config.pageTitle || "Valentine 💝";
 
-/* ---------------- THEME ---------------- */
+/* ---------------- THEME COLORS ---------------- */
 (function applyTheme(){
   if(!config.colors) return;
   const r = document.documentElement;
@@ -12,87 +12,89 @@ document.title = config.pageTitle || "Valentine 💝";
   r.style.setProperty("--text", config.colors.textColor);
 })();
 
-/* ---------------- HELPERS ---------------- */
-function showSection(id){
+/* ---------------- UTIL ---------------- */
+function showOnly(id){
   document.querySelectorAll(".question-section").forEach(s => s.classList.add("hidden"));
+  const t = document.getElementById("timeline");
+  if (t) t.classList.add("hidden");
   const el = document.getElementById(id);
   if(el) el.classList.remove("hidden");
 }
 
-function typeText(el, text, speed=35){
+function typeText(el, text, speed=32){
   if(!el) return;
   el.textContent = "";
   let i = 0;
-  const timer = setInterval(() => {
+  const timer = setInterval(()=>{
     el.textContent += text[i] || "";
     i++;
     if(i >= text.length) clearInterval(timer);
   }, speed);
 }
 
-function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+function flashWarning(warnEl, text){
+  if(!warnEl) return;
+  warnEl.textContent = text;
+  warnEl.classList.remove("hidden");
+  setTimeout(()=> warnEl.classList.add("hidden"), 1900);
+}
 
-/* ---------------- MUSIC (reliable unlock) ---------------- */
-async function setupMusic(){
-  const audio = document.getElementById("bgMusic");
-  const toggle = document.getElementById("musicToggle");
-  const startBtn = document.getElementById("introStartBtn");
-  const overlay = document.getElementById("introOverlay");
+/* ---------------- YOUTUBE MUSIC ---------------- */
+let ytPlayer = null;
+let ytReady = false;
+let ytWantsPlay = false;
 
-  if(!audio || !toggle || !startBtn) return;
-
-  const setLabel = () => toggle.textContent = audio.paused ? "🎵 Play Music" : "🔇 Stop Music";
-
-  const tryPlay = async () => {
-    try{
-      audio.muted = false;
-      audio.volume = 0.85;
-      await audio.play();
-      setLabel();
-      return true;
-    }catch(e){
-      console.log("Audio blocked:", e);
-      setLabel();
-      return false;
-    }
-  };
-
-  const armTapAnywhereUnlock = () => {
-    toggle.textContent = "🔓 Tap anywhere to start music";
-    const unlock = async () => {
-      const ok = await tryPlay();
-      if(ok){
-        document.removeEventListener("pointerdown", unlock);
-        document.removeEventListener("touchstart", unlock);
+window.onYouTubeIframeAPIReady = function(){
+  ytPlayer = new YT.Player("ytMusic", {
+    videoId: "QGLHe7K0CQQ",
+    playerVars: {
+      autoplay: 0,
+      controls: 0,
+      loop: 1,
+      playlist: "QGLHe7K0CQQ",
+      modestbranding: 1,
+      rel: 0
+    },
+    events: {
+      onReady: () => {
+        ytReady = true;
+        try { ytPlayer.setVolume(70); } catch(e) {}
+        if (ytWantsPlay) {
+          ytWantsPlay = false;
+          playYtMusic();
+        }
       }
-    };
-    document.addEventListener("pointerdown", unlock);
-    document.addEventListener("touchstart", unlock, { passive: true });
-  };
-
-  startBtn.addEventListener("click", async () => {
-    if(overlay) overlay.style.display = "none";
-    const ok = await tryPlay();
-    if(!ok) armTapAnywhereUnlock();
-  });
-
-  toggle.addEventListener("click", async () => {
-    if(audio.paused){
-      const ok = await tryPlay();
-      if(!ok) armTapAnywhereUnlock();
-    }else{
-      audio.pause();
-      setLabel();
     }
   });
+};
 
-  setLabel();
+function playYtMusic(){
+  if(!ytReady || !ytPlayer) { ytWantsPlay = true; return; }
+  try{
+    ytPlayer.unMute();
+    ytPlayer.setVolume(70);
+    ytPlayer.playVideo();
+  }catch(e){
+    console.log("YT play failed:", e);
+  }
+}
+
+function stopYtMusic(){
+  if(!ytReady || !ytPlayer) return;
+  try{ ytPlayer.pauseVideo(); }catch(e){}
+}
+
+function isYtPlaying(){
+  try{
+    return ytPlayer && ytReady && ytPlayer.getPlayerState && ytPlayer.getPlayerState() === 1;
+  }catch(e){ return false; }
 }
 
 /* ---------------- FLOATING EMOJIS ---------------- */
-function createFloatingElements(){
+function createFloating(){
   const container = document.querySelector(".floating-elements");
   if(!container) return;
+
   const hearts = config.floatingEmojis?.hearts || ["❤️"];
   const bears = config.floatingEmojis?.bears || ["🧸"];
 
@@ -103,86 +105,98 @@ function createFloatingElements(){
   };
 
   hearts.forEach(h=>{
-    const d=document.createElement("div");
-    d.className="heart";
-    d.innerHTML=h;
+    const d = document.createElement("div");
+    d.className = "heart";
+    d.innerHTML = h;
     setPos(d);
     container.appendChild(d);
   });
 
   bears.forEach(b=>{
-    const d=document.createElement("div");
-    d.className="bear";
-    d.innerHTML=b;
+    const d = document.createElement("div");
+    d.className = "bear";
+    d.innerHTML = b;
     setPos(d);
     container.appendChild(d);
   });
 }
 
-/* ---------------- DEMON NO BUTTON + FAKE SYSTEM WARNING ---------------- */
-function attachSystemWarning(el){
-  if(!el) return;
-  el.classList.remove("hidden");
-  el.textContent = "⚠️ SYSTEM WARNING: Wrong choice detected. Relationship stability: 2% 😈";
-  setTimeout(()=> el.classList.add("hidden"), 2400);
+/* ---------------- CURSOR TRAIL ---------------- */
+function setupCursorTrail(){
+  document.addEventListener("mousemove", (e)=>{
+    const h = document.createElement("div");
+    h.className = "cursor-heart";
+    h.textContent = ["💗","💖","💘"][Math.floor(Math.random()*3)];
+    h.style.left = e.clientX + "px";
+    h.style.top  = e.clientY + "px";
+    document.body.appendChild(h);
+    setTimeout(()=> h.remove(), 800);
+  });
 }
 
-function demonNoButton(noBtn, yesBtn, warningEl){
-  let attempts = 0;
-  noBtn.style.position = "fixed";
+/* ---------------- FAKE CHAT SIM ---------------- */
+async function runChatSim(){
+  const chat = document.getElementById("chatSim");
+  const linesBox = document.getElementById("chatLines");
+  const cont = document.getElementById("chatContinue");
+  if(!chat || !linesBox || !cont) return;
 
-  const move = () => {
-    attempts++;
+  chat.classList.remove("hidden");
+  linesBox.innerHTML = "";
+  cont.classList.add("hidden");
 
-    attachSystemWarning(warningEl);
+  const lines = [
+    "Ro Ro: hey 👀",
+    "Bubu: hmm 😌",
+    "Ro Ro: important question coming",
+    "Bubu: dramatic",
+    "Ro Ro: always 😄",
+    "Ro Ro: ok ready? 💗"
+  ];
 
-    const msgs = [
-      "Nice try 😜",
-      "Not happening 😌",
-      "Wrong answer 😂",
-      "Illegal click 🚫",
-      "Think again 😏",
-      "HAHA nope 😈",
-      "Ok stop 😭",
-      "Fine… YES 💘"
-    ];
+  for(const l of lines){
+    const d = document.createElement("div");
+    d.className = "chat-line";
+    d.textContent = l;
+    linesBox.appendChild(d);
+    await new Promise(r => setTimeout(r, 650));
+  }
 
-    noBtn.textContent = msgs[Math.min(attempts-1, msgs.length-1)];
+  cont.classList.remove("hidden");
 
-    const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-    const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
-
-    noBtn.style.left = `${Math.max(12,x)}px`;
-    noBtn.style.top  = `${Math.max(12,y)}px`;
-    noBtn.style.transform = `rotate(${Math.random()*360}deg) scale(${0.75 + Math.random()*0.6})`;
-
-    if(attempts >= 7){
-      noBtn.textContent = "Yes!! 💘";
-      noBtn.style.transform = "rotate(0deg) scale(1)";
-      noBtn.addEventListener("click", () => yesBtn.click(), { once:true });
-    }
-  };
-
-  noBtn.addEventListener("mouseenter", move);
-  noBtn.addEventListener("click", (e)=>{ e.preventDefault(); move(); });
-  noBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); move(); }, { passive:false });
-
-  setTimeout(move, 220);
+  return new Promise(resolve => {
+    cont.addEventListener("click", () => {
+      chat.classList.add("hidden");
+      resolve(true);
+    }, { once: true });
+  });
 }
 
-/* ---------------- LOVE METER ---------------- */
+/* ---------------- LOVE METER + SMART REACTIONS ---------------- */
 function setupLoveMeter(){
   const loveMeter = document.getElementById("loveMeter");
   const loveValue = document.getElementById("loveValue");
   const extraLove = document.getElementById("extraLove");
+  const smart = document.getElementById("smartReaction");
   if(!loveMeter || !loveValue || !extraLove) return;
 
   loveMeter.value = 100;
   loveValue.textContent = "100";
+  if (smart) smart.textContent = "🙂 suspicious";
+
+  function setSmart(v){
+    if(!smart) return;
+    if(v < 120) smart.textContent = "🙂 hmm okay";
+    else if(v < 300) smart.textContent = "😌 good human";
+    else if(v < 1200) smart.textContent = "🥰 obsessed";
+    else if(v < 5000) smart.textContent = "🚀 dangerous love";
+    else smart.textContent = "💘 GOD MODE";
+  }
 
   loveMeter.addEventListener("input", ()=>{
     const v = parseInt(loveMeter.value, 10);
     loveValue.textContent = String(v);
+    setSmart(v);
 
     if(v > 100){
       extraLove.classList.remove("hidden");
@@ -203,119 +217,89 @@ function setupLoveMeter(){
   });
 }
 
-/* ---------------- TIMED SURPRISE POPUP ---------------- */
-function setupTimedSurprise(){
-  // shows once per page load
-  setTimeout(() => {
-    // no alert if overlay still there (avoid gesture issues)
-    const overlay = document.getElementById("introOverlay");
-    if(overlay && overlay.style.display !== "none") return;
-    window.alert("Still here? That means you like me 😌💗");
-  }, 20000);
-}
+/* ---------------- COMPAT SCAN ---------------- */
+function runCompatScan(next){
+  const fill = document.getElementById("scanFill");
+  const txt = document.getElementById("scanText");
+  if(!fill || !txt) { next(); return; }
 
-/* ---------------- HIDDEN CLICK EASTER EGG ---------------- */
-function setupTitleEasterEgg(){
-  const title = document.getElementById("valentineTitle");
-  if(!title) return;
-  title.style.cursor = "pointer";
-  title.addEventListener("click", () => {
-    window.alert("💌 Secret unlocked:\nYou are my favorite human. Always.");
-  });
-}
+  showOnly("compat");
 
-/* ---------------- HIDDEN KEYBOARD SURPRISE ---------------- */
-function setupHiddenSurprise(){
-  const secret = "bubu";
-  let buf = "";
-  document.addEventListener("keydown", (e)=>{
-    buf += (e.key || "").toLowerCase();
-    buf = buf.slice(-12);
-    if(buf.includes(secret)){
-      buf = "";
-      window.alert("💌 Hidden Surprise: Ro Ro loves you more than 10,000% 💖");
+  let p = 0;
+  txt.textContent = "Analyzing love patterns…";
+  fill.style.width = "0%";
+
+  const t = setInterval(()=>{
+    p += 4;
+    fill.style.width = p + "%";
+    if(p >= 100){
+      clearInterval(t);
+      txt.textContent = "Compatibility: 1000% 💞 (Certified)";
+      setTimeout(next, 900);
     }
-  });
+  }, 80);
 }
 
-/* ---------------- MINI GAME: CATCH 5 HEARTS ---------------- */
-function setupCatchHeartGame(onComplete){
-  const startBtn = document.getElementById("startGameBtn");
-  const area = document.getElementById("gameArea");
-  const caughtEl = document.getElementById("caughtCount");
-  if(!startBtn || !area || !caughtEl) return;
+/* ---------------- NO BUTTON: START NORMAL -> BOUNCE -> RUN AWAY ---------------- */
+function demonNoStartsNice(noBtn, yesBtn, warnEl){
+  if(!noBtn || !yesBtn) return;
 
-  let caught = 0;
-  let running = false;
-  let spawner = null;
+  let attempts = 0;
+  let runaway = false;
 
-  const spawnHeart = () => {
-    if(!running) return;
+  // Start normal with bounce on hover (but stays in layout)
+  noBtn.classList.add("no-bounce");
 
-    const heart = document.createElement("div");
-    heart.className = "game-heart";
-    heart.textContent = ["❤️","💖","💝","💗","💓"][Math.floor(Math.random()*5)];
+  const moveAway = () => {
+    // activate runaway positioning
+    runaway = true;
+    noBtn.classList.remove("no-bounce");
 
-    const rect = area.getBoundingClientRect();
-    const x = Math.random() * (rect.width - 30) + 15;
-    const y = Math.random() * (rect.height - 30) + 15;
+    const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+    const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
 
-    heart.style.left = x + "px";
-    heart.style.top  = y + "px";
-
-    const life = 1100 + Math.random()*900;
-    const killTimer = setTimeout(() => {
-      if(heart && heart.parentNode) heart.parentNode.removeChild(heart);
-    }, life);
-
-    heart.addEventListener("click", () => {
-      clearTimeout(killTimer);
-      if(heart && heart.parentNode) heart.parentNode.removeChild(heart);
-      caught++;
-      caughtEl.textContent = String(caught);
-
-      if(caught >= 5){
-        running = false;
-        if(spawner) clearInterval(spawner);
-        area.innerHTML = "";
-        startBtn.disabled = false;
-        startBtn.textContent = "Unlocked ✅";
-        setTimeout(() => onComplete && onComplete(), 450);
-      }
-    });
-
-    area.appendChild(heart);
+    noBtn.style.position = "fixed";
+    noBtn.style.left = Math.max(12, x) + "px";
+    noBtn.style.top  = Math.max(12, y) + "px";
+    noBtn.style.transform = `rotate(${Math.random()*360}deg) scale(${0.8 + Math.random()*0.5})`;
   };
 
-  startBtn.addEventListener("click", async () => {
-    if(running) return;
-    caught = 0;
-    caughtEl.textContent = "0";
-    area.innerHTML = "";
-    startBtn.disabled = true;
-    startBtn.textContent = "Catch them! 💞";
-    running = true;
+  const onTry = (e) => {
+    e.preventDefault();
+    attempts++;
 
-    // spawn faster over time
-    let interval = 650;
-    spawner = setInterval(spawnHeart, interval);
-
-    // difficulty ramp
-    for(let i=0;i<5;i++){
-      await sleep(1400);
-      if(!running) break;
-      interval = Math.max(260, interval - 90);
-      clearInterval(spawner);
-      spawner = setInterval(spawnHeart, interval);
+    if(attempts <= 2){
+      // still stays in place
+      flashWarning(warnEl, "⚠️ SYSTEM: ‘No’ not accepted 😌 Try again.");
+      noBtn.classList.add("no-bounce");
+      return;
     }
+
+    flashWarning(warnEl, "⚠️ SYSTEM SCAN: Wrong choice detected 😈");
+
+    const msgs = ["Nice try 😜","Not happening 😈","Illegal click 🚫","Think again 😏","HAHA nope 😂","Ok stop 😭","Fine… YES 💘"];
+    noBtn.textContent = msgs[Math.min(attempts-3, msgs.length-1)];
+    moveAway();
+
+    if(attempts >= 9){
+      noBtn.textContent = "Yes!! 💘";
+      noBtn.style.transform = "none";
+      noBtn.addEventListener("click", ()=> yesBtn.click(), { once:true });
+    }
+  };
+
+  noBtn.addEventListener("mouseenter", ()=>{
+    if(!runaway) noBtn.classList.add("no-bounce");
   });
+
+  noBtn.addEventListener("click", onTry);
+  noBtn.addEventListener("touchstart", onTry, { passive:false });
 }
 
-/* ---------------- FIREWORKS ON YES ---------------- */
+/* ---------------- FIREWORKS ---------------- */
 function setupFireworks(){
   const canvas = document.getElementById("fireworksCanvas");
   if(!canvas) return null;
-
   const ctx = canvas.getContext("2d");
   const DPR = Math.max(1, window.devicePixelRatio || 1);
 
@@ -324,7 +308,7 @@ function setupFireworks(){
     canvas.height = Math.floor(window.innerHeight * DPR);
     canvas.style.width = window.innerWidth + "px";
     canvas.style.height = window.innerHeight + "px";
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
   };
   window.addEventListener("resize", resize);
   resize();
@@ -332,84 +316,92 @@ function setupFireworks(){
   let particles = [];
   let anim = null;
 
-  const burst = (x, y) => {
+  const burst = (x,y) => {
     const count = 90;
     for(let i=0;i<count;i++){
       const a = Math.random()*Math.PI*2;
       const s = 2 + Math.random()*6;
-      particles.push({
-        x, y,
-        vx: Math.cos(a)*s,
-        vy: Math.sin(a)*s,
-        life: 60 + Math.random()*30,
-        size: 1 + Math.random()*2.4,
-        alpha: 1
-      });
+      particles.push({ x,y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, life:60+Math.random()*30, size:1+Math.random()*2.4 });
     }
   };
 
   const tick = () => {
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles = particles.filter(p => p.life > 0);
+    particles = particles.filter(p=> p.life>0);
     for(const p of particles){
-      p.vy += 0.08; // gravity
+      p.vy += 0.08;
       p.x += p.vx;
       p.y += p.vy;
       p.life -= 1;
-      p.alpha = Math.max(0, p.life/90);
 
-      ctx.globalAlpha = p.alpha;
+      const alpha = Math.max(0, p.life/90);
+      ctx.globalAlpha = alpha;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
 
-    if(particles.length > 0){
-      anim = requestAnimationFrame(tick);
-    }else{
-      if(anim) cancelAnimationFrame(anim);
-      anim = null;
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-    }
+    if(particles.length>0) anim = requestAnimationFrame(tick);
+    else { anim=null; ctx.clearRect(0,0,canvas.width,canvas.height); }
   };
 
   return {
     fire(){
-      // multiple bursts
       for(let i=0;i<7;i++){
-        burst(
-          Math.random()*window.innerWidth,
-          Math.random()*window.innerHeight*0.6
-        );
+        burst(Math.random()*window.innerWidth, Math.random()*window.innerHeight*0.6);
       }
       if(!anim) tick();
     }
   };
 }
 
+/* ---------------- LOCK SCREEN ---------------- */
+function showLockScreenThen(next){
+  const ls = document.getElementById("lockScreen");
+  if(!ls){ next(); return; }
+  ls.classList.remove("hidden");
+  setTimeout(()=>{
+    ls.classList.add("hidden");
+    next();
+  }, 1500);
+}
+
+/* ---------------- DARK MODE ---------------- */
+function setupDarkMode(){
+  const btn = document.getElementById("darkModeToggle");
+  if(!btn) return;
+
+  const saved = localStorage.getItem("val_dark") === "1";
+  if(saved) document.body.classList.add("dark");
+  btn.textContent = document.body.classList.contains("dark") ? "☀️ Light" : "🌙 Dark";
+
+  btn.addEventListener("click", ()=>{
+    document.body.classList.toggle("dark");
+    const isDark = document.body.classList.contains("dark");
+    localStorage.setItem("val_dark", isDark ? "1" : "0");
+    btn.textContent = isDark ? "☀️ Light" : "🌙 Dark";
+  });
+}
+
+/* ---------------- TIMED SURPRISE POPUP ---------------- */
+function setupTimedPopup(){
+  setTimeout(()=>{
+    const overlay = document.getElementById("introOverlay");
+    if(overlay && !overlay.classList.contains("hidden") && overlay.style.display !== "none") return;
+    window.alert("Still here? That means you like me 😌💗");
+  }, 20000);
+}
+
 /* ---------------- MAIN INIT ---------------- */
 window.addEventListener("DOMContentLoaded", async () => {
-  await setupMusic();
+  setupDarkMode();
+  setupCursorTrail();
+  setupTimedPopup();
 
-  // Dark mode toggle
-  const darkBtn = document.getElementById("darkModeToggle");
-  if(darkBtn){
-    const saved = localStorage.getItem("val_dark") === "1";
-    if(saved) document.body.classList.add("dark");
-    darkBtn.textContent = document.body.classList.contains("dark") ? "☀️ Light" : "🌙 Dark";
-
-    darkBtn.addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-      const isDark = document.body.classList.contains("dark");
-      localStorage.setItem("val_dark", isDark ? "1" : "0");
-      darkBtn.textContent = isDark ? "☀️ Light" : "🌙 Dark";
-    });
-  }
-
-  // Texts
-  document.getElementById("valentineTitle").textContent =
-    `${config.valentineName || "My Love"}, my love...`;
+  // Set texts from config
+  const title = document.getElementById("valentineTitle");
+  if(title) title.textContent = `${config.valentineName || "My Love"}, my love...`;
 
   document.getElementById("question1Text").textContent = config.questions?.first?.text || "Do you like me?";
   document.getElementById("yesBtn1").textContent = config.questions?.first?.yesBtn || "Yes";
@@ -424,57 +416,108 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("yesBtn3").textContent = config.questions?.third?.yesBtn || "Yes!";
   document.getElementById("noBtn3").textContent = config.questions?.third?.noBtn || "No";
 
-  // Features
-  createFloatingElements();
+  // Floating emojis
+  createFloating();
+
+  // Fake chat (runs after Start)
+  const startBtn = document.getElementById("introStartBtn");
+  const overlay = document.getElementById("introOverlay");
+
+  // Music toggle
+  const musicToggle = document.getElementById("musicToggle");
+  if(musicToggle){
+    musicToggle.addEventListener("click", ()=>{
+      if(isYtPlaying()){
+        stopYtMusic();
+        musicToggle.textContent = "🎵 Play Music";
+      }else{
+        playYtMusic();
+        musicToggle.textContent = "🔇 Stop Music";
+      }
+    });
+  }
+
+  // Easter egg: title click
+  if(title){
+    title.style.cursor = "pointer";
+    title.addEventListener("click", ()=> window.alert("💌 Secret unlocked:\nYou are my favorite human. Always."));
+  }
+
+  // Love meter
   setupLoveMeter();
-  setupTimedSurprise();
-  setupTitleEasterEgg();
-  setupHiddenSurprise();
 
-  const fireworks = setupFireworks();
+  // Fireworks
+  const fw = setupFireworks();
 
-  // Flow buttons
-  document.getElementById("yesBtn1").addEventListener("click", () => showSection("question2"));
+  // Start flow
+  if(startBtn){
+    startBtn.addEventListener("click", async ()=>{
+      // hide overlay
+      overlay.style.display = "none";
 
-  // “No” demon + fake warnings
-  demonNoButton(
-    document.getElementById("noBtn1"),
-    document.getElementById("yesBtn1"),
-    document.getElementById("systemWarning")
-  );
+      // play music (user gesture)
+      playYtMusic();
+      if(musicToggle) musicToggle.textContent = "🔇 Stop Music";
 
-  document.getElementById("secretAnswerBtn").addEventListener("click", () => {
+      // chat sim
+      await runChatSim();
+
+      // show question1
+      showOnly("question1");
+    });
+  }
+
+  // Q1
+  const yes1 = document.getElementById("yesBtn1");
+  const no1 = document.getElementById("noBtn1");
+  const warn1 = document.getElementById("systemWarning");
+
+  yes1.addEventListener("click", ()=> showOnly("question2"));
+  demonNoStartsNice(no1, yes1, warn1);
+
+  document.getElementById("secretAnswerBtn").addEventListener("click", ()=>{
     window.alert(config.questions?.first?.secretAnswer || "I love you ❤️");
   });
 
-  // Next goes to mini game instead of question 3
-  document.getElementById("nextBtn").addEventListener("click", () => showSection("minigame"));
-
-  // Mini game completion unlocks final question
-  setupCatchHeartGame(() => showSection("question3"));
-
-  // Demon “No” on final question too
-  demonNoButton(
-    document.getElementById("noBtn3"),
-    document.getElementById("yesBtn3"),
-    document.getElementById("systemWarning3")
-  );
-
-  // YES final: celebration + typed love letter + fireworks
-  document.getElementById("yesBtn3").addEventListener("click", () => {
-    showSection("celebration");
-
-    const title = document.getElementById("celebrationTitle");
-    const msg = document.getElementById("celebrationMessage");
-    const emo = document.getElementById("celebrationEmojis");
-
-    title.textContent = config.celebration?.title || "Yay! 🎉";
-    emo.textContent = config.celebration?.emojis || "🎁💖🤗💝💋❤️💕";
-
-    // Typed love letter animation
-    typeText(msg, config.celebration?.message || "Now come get your gift… 💋", 32);
-
-    // Fireworks
-    if(fireworks) fireworks.fire();
+  // Q2 next -> compat scan -> Q3
+  document.getElementById("nextBtn").addEventListener("click", ()=>{
+    runCompatScan(()=> showOnly("question3"));
   });
+
+  // Q3
+  const yes3 = document.getElementById("yesBtn3");
+  const no3 = document.getElementById("noBtn3");
+  const warn3 = document.getElementById("systemWarning3");
+
+  demonNoStartsNice(no3, yes3, warn3);
+
+  yes3.addEventListener("click", ()=>{
+    // lock screen then celebration
+    showLockScreenThen(()=>{
+      showOnly("celebration");
+
+      const ct = document.getElementById("celebrationTitle");
+      const cm = document.getElementById("celebrationMessage");
+      const ce = document.getElementById("celebrationEmojis");
+
+      ct.textContent = config.celebration?.title || "Yay! 🎉";
+      ce.textContent = config.celebration?.emojis || "🎁💖🤗💝💋❤️💕";
+
+      // typed love letter
+      typeText(cm, config.celebration?.message || "Now come get your gift… 💋", 32);
+
+      // fireworks
+      if(fw) fw.fire();
+    });
+  });
+
+  // Timeline button
+  const seeTl = document.getElementById("seeTimelineBtn");
+  const tl = document.getElementById("timeline");
+  if(seeTl && tl){
+    seeTl.addEventListener("click", ()=>{
+      tl.classList.remove("hidden");
+      tl.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 });
