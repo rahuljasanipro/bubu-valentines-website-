@@ -1,9 +1,10 @@
 const CONFIG = {
   // 🏷️ UI VERSION
-  version: "v5.2 💗",
+  version: "v5.3 (Master Key Added) 💗",
 
-  // 🔑 PASSWORD TO UNLOCK
-  passcode: "1111",
+  // 🔑 PASSWORDS
+  passcode: "1111",   // Normal Start
+  masterKey: "143",   // 🚀 Jumps straight to Celebration (Secret!)
 
   valentineName: "Bubu",
   pageTitle: "Bubu 💗 Ro Ro",
