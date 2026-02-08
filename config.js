@@ -4,42 +4,42 @@
 
 const CONFIG = {
   valentineName: "Bubu",
-  pageTitle: "Bubu ❤️ Ro Ro",
+  pageTitle: "Bubu 💗 Ro Ro",
 
   floatingEmojis: {
     hearts: ["❤️", "💖", "💝", "💗", "💓"],
-    bears: ["🧸", "🐻"],
+    bears: ["🧸", "🐻"]
   },
 
   questions: {
     first: {
-      text: "Bubu, do you like Ro Ro? 🥺❤️",
+      text: "Bubu, do you like Ro Ro? 🥺💘",
       yesBtn: "Yes 😌",
       noBtn: "No 🙈",
-      secretAnswer: "I don't just like you, I love you! ❤️",
+      secretAnswer: "I don't like you… I LOVE YOU ❤️"
     },
     second: {
-      text: "How much do you love Ro Ro? 💞",
+      text: "How much do you love me? 😳",
       startText: "This much!",
-      nextBtn: "Next ❤️",
+      nextBtn: "Next ❤️"
     },
     third: {
       text: "Will you be my Valentine on February 14th, 2026? 🌹",
       yesBtn: "Yes!! 💘",
-      noBtn: "No 😜",
-    },
+      noBtn: "No 😜"
+    }
   },
 
   loveMessages: {
-    extreme: "WOOOOW you love Ro Ro that much?? 🥰🚀💝",
+    extreme: "WOOOOW You love me that much?? 🥰🚀💝",
     high: "To infinity and beyond! 🚀💝",
-    normal: "And beyond! 🥰",
+    normal: "And beyond! 🥰"
   },
 
   celebration: {
-    title: "Yayyy!! Ro Ro is the luckiest person alive 💘🎉",
-    message: "Now come here — hug first, then Valentine’s plan 😘🤗",
-    emojis: "🎁💖🤗💝💋❤️💕",
+    title: "Yay! Ro Ro is the luckiest person ever 🎉💓",
+    message: "Now come get your gift… a tight hug + a million kisses 💋",
+    emojis: "🎁💖🤗💝💋❤️💕"
   },
 
   colors: {
@@ -47,25 +47,15 @@ const CONFIG = {
     backgroundEnd: "#ffc3a0",
     buttonBackground: "#ff6b6b",
     buttonHover: "#ff8787",
-    textColor: "#ff4757",
+    textColor: "#ff4757"
   },
 
   animations: {
     floatDuration: "15s",
     floatDistance: "50px",
     bounceSpeed: "0.5s",
-    heartExplosionSize: 1.5,
-  },
-
-  // kept for compatibility, but we play via YouTube in script.js
-  music: {
-    enabled: true,
-    autoplay: false,
-    musicUrl: "",
-    startText: "🎵 Play Music",
-    stopText: "🔇 Stop Music",
-    volume: 0.5,
-  },
+    heartExplosionSize: 1.5
+  }
 };
 
 window.VALENTINE_CONFIG = CONFIG;
