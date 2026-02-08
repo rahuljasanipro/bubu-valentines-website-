@@ -442,7 +442,7 @@ function setupExtras(){
 
   /* --- NEW FEATURES LOGIC --- */
 
-  // 1. Coupons
+  // 1. Coupons (INFINITY LOGIC ADDED HERE)
   const openCoupons = document.getElementById("openCouponsBtn");
   const closeCoupons = document.getElementById("closeCouponsBtn");
   const couponsOverlay = document.getElementById("couponsOverlay");
@@ -457,11 +457,25 @@ function setupExtras(){
            const el = document.createElement("div");
            el.className = "coupon-ticket";
            el.innerHTML = `<div class="coupon-title">${c.text}</div><div class="coupon-desc">${c.desc}</div>`;
+           
            el.onclick = () => {
-             if(el.classList.contains("redeemed")) return;
-             if(confirm("Redeem this coupon? (One time use!)")){
-               el.classList.add("redeemed");
-               el.querySelector(".coupon-title").textContent += " (REDEEMED ✅)";
+             // If already redeemed, just remind them it's infinity
+             if(el.classList.contains("redeemed")) {
+                alert("Don't worry, you can use this forever! ♾️💖");
+                return;
+             }
+             
+             // First click interaction
+             if(confirm("Redeem this coupon?")){
+               // Playful prank alert
+               alert("Processing... wait... 🤔");
+               setTimeout(() => {
+                   alert("Just kidding! You have INFINITY of these! 😜♾️");
+                   // Visual change to GOLD/INFINITY state
+                   el.classList.add("redeemed");
+                   el.querySelector(".coupon-title").textContent += " (∞)";
+                   el.querySelector(".coupon-desc").textContent = "Unlimited use for you 💗";
+               }, 600);
              }
            };
            couponsGrid.appendChild(el);
@@ -495,7 +509,7 @@ function setupExtras(){
   function resetGame(){
     score = 0; timeLeft = 15;
     scoreEl.textContent = "0"; timerEl.textContent = "15";
-    gameMsg.textContent = "Catch the Hearts! 💖";
+    gameMsg.textContent = "Catch 5 Hearts! 💖"; // Updated text
     startBtn.classList.remove("hidden");
     closeGame.classList.add("hidden");
     gameArea.innerHTML = "";
@@ -518,16 +532,20 @@ function setupExtras(){
     const h = document.createElement("div");
     h.textContent = "💖";
     h.className = "game-heart-item";
+    // Random position
     h.style.left = Math.random() * 80 + 10 + "%";
+    
     h.addEventListener("click", ()=>{
       score++;
       scoreEl.textContent = score;
       h.remove();
-      if(score >= 10) endGame(true);
+      // WIN CONDITION: 5 HEARTS
+      if(score >= 5) endGame(true);
     });
+    
     gameArea.appendChild(h);
-    // Cleanup fallen hearts
-    setTimeout(()=> { if(h.parentNode) h.remove(); }, 2600);
+    // Cleanup fallen hearts after animation ends
+    setTimeout(()=> { if(h.parentNode) h.remove(); }, 4100);
   }
 
   function endGame(win=false){
