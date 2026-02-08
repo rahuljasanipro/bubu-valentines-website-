@@ -3,79 +3,69 @@
 // ============================================
 
 const CONFIG = {
-    // Your Valentine's name that will appear in the title
-    valentineName: "Bubu",
+  valentineName: "Bubu",
+  pageTitle: "Bubu ❤️ Ro Ro",
 
-    // The title that appears in the browser tab
-    pageTitle: "Bubu ❤️ Ro Ro",
+  floatingEmojis: {
+    hearts: ["❤️", "💖", "💝", "💗", "💓"],
+    bears: ["🧸", "🐻"],
+  },
 
-    // Floating emojis that appear in the background
-    floatingEmojis: {
-        hearts: ['❤️', '💖', '💝', '💗', '💓'],
-        bears: ['🧸', '🐻']
+  questions: {
+    first: {
+      text: "Bubu, do you like Ro Ro? 🥺❤️",
+      yesBtn: "Yes 😌",
+      noBtn: "No 🙈",
+      secretAnswer: "I don't just like you, I love you! ❤️",
     },
-
-    // Questions and answers
-    questions: {
-        first: {
-            text: "Bubu, do you like Ro Ro? 🥺❤️",
-            yesBtn: "Yes 😌",
-            noBtn: "No 🙈",
-            secretAnswer: "I don't just like you, I love you! ❤️"
-        },
-        second: {
-            text: "How much do you love Ro Ro? 💞",
-            startText: "This much!",
-            nextBtn: "Next ❤️"
-        },
-        third: {
-            text: "Will you be my Valentine on February 14th, 2026? 🌹",
-            yesBtn: "Yes!! 💘",
-            noBtn: "No 😜"
-        }
+    second: {
+      text: "How much do you love Ro Ro? 💞",
+      startText: "This much!",
+      nextBtn: "Next ❤️",
     },
-
-    // Love meter messages
-    loveMessages: {
-        extreme: "WOOOOW you love Ro Ro that much?? 🥰🚀💝",
-        high: "To infinity and beyond! 🚀💝",
-        normal: "And beyond! 🥰"
+    third: {
+      text: "Will you be my Valentine on February 14th, 2026? 🌹",
+      yesBtn: "Yes!! 💘",
+      noBtn: "No 😜",
     },
+  },
 
-    // Messages after they say Yes
-    celebration: {
-        title: "Yayyy!! Ro Ro is the luckiest person alive 💘🎉",
-        message: "Now come here — hug first, then Valentine’s plan 😘🤗",
-        emojis: "🎁💖🤗💝💋❤️💕"
-    },
+  loveMessages: {
+    extreme: "WOOOOW you love Ro Ro that much?? 🥰🚀💝",
+    high: "To infinity and beyond! 🚀💝",
+    normal: "And beyond! 🥰",
+  },
 
-    // Color scheme
-    colors: {
-        backgroundStart: "#ffafbd",
-        backgroundEnd: "#ffc3a0",
-        buttonBackground: "#ff6b6b",
-        buttonHover: "#ff8787",
-        textColor: "#ff4757"
-    },
+  celebration: {
+    title: "Yayyy!! Ro Ro is the luckiest person alive 💘🎉",
+    message: "Now come here — hug first, then Valentine’s plan 😘🤗",
+    emojis: "🎁💖🤗💝💋❤️💕",
+  },
 
-    // Animation settings
-    animations: {
-        floatDuration: "15s",
-        floatDistance: "50px",
-        bounceSpeed: "0.5s",
-        heartExplosionSize: 1.5
-    },
+  colors: {
+    backgroundStart: "#ffafbd",
+    backgroundEnd: "#ffc3a0",
+    buttonBackground: "#ff6b6b",
+    buttonHover: "#ff8787",
+    textColor: "#ff4757",
+  },
 
-    // Background Music
-    music: {
-        enabled: true,
-        autoplay: false,   // safer for browsers
-        musicUrl: "https://res.cloudinary.com/dncywqfpb/video/upload/v1738399057/music_qrhjvy.mp3",
-        startText: "🎵 Play Music",
-        stopText: "🔇 Stop Music",
-        volume: 0.5
-    }
+  animations: {
+    floatDuration: "15s",
+    floatDistance: "50px",
+    bounceSpeed: "0.5s",
+    heartExplosionSize: 1.5,
+  },
+
+  // kept for compatibility, but we play via YouTube in script.js
+  music: {
+    enabled: true,
+    autoplay: false,
+    musicUrl: "",
+    startText: "🎵 Play Music",
+    stopText: "🔇 Stop Music",
+    volume: 0.5,
+  },
 };
 
-// Don't modify anything below this line
 window.VALENTINE_CONFIG = CONFIG;
