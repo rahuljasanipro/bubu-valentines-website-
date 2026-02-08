@@ -1,6 +1,6 @@
 const CONFIG = {
   // 🏷️ UI VERSION
-  version: "v5.1 (Clean & Optimized) 💗",
+  version: "v5 💗",
 
   // 🔑 PASSWORD TO UNLOCK
   passcode: "1111",
@@ -155,7 +155,7 @@ const CONFIG = {
   bucketList: [
     "Visit London 🗼",
     "Own a Dog 🐶",
-    "Go to AOF Course Together 💃",
+    "Go to AOL Course Together 💃",
     "Go on a Northern Lights trip 🌌",
     "Build a pillow fort 🏰",
     "Marry you 💍",
@@ -236,9 +236,9 @@ const CONFIG = {
 
   // 📊 RELATIONSHIP STATS
   relStats: {
-    days: "800+ Days",
+    days: "95+ Days",
     fightsWon: "99% (by You)",
-    pizzas: "50+ Pizzas",
+    chatorapanti: "100%",
     kisses: "Infinity 💋"
   },
 
