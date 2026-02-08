@@ -271,6 +271,7 @@ body{
 .captcha-row input{
   width: 20px;
   height: 20px;
+  flex-shrink: 0; /* Prevents checkbox from squishing */
 }
 .captcha-btn{
   width: 100%;
@@ -301,17 +302,23 @@ body{
   font-weight: 900;
 }
 
-/* AI box alignment fix */
+/* AI box alignment fix - CRITICAL FIX FOR MOBILE */
 .ai-box{
   margin: 10px auto 14px;
-  width: min(760px, 92vw);
+  width: min(760px, 100%); /* Use 100% of container */
   background: rgba(0,0,0,0.08);
   padding: 16px;
   border-radius: 16px;
   text-align:left;
   font-weight: 900;
-  white-space: pre-wrap;
-  line-height: 1.35;
+  
+  /* Fix text overflow */
+  white-space: pre-wrap; 
+  word-wrap: break-word;
+  word-break: break-word; /* Ensures long lines break */
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  font-size: 14px; /* Slightly smaller default for safety */
 }
 
 /* Celebration */
@@ -547,10 +554,19 @@ body.skincare .promise-tile{
   color: #f2f2f2;
 }
 
-/* Mobile */
+/* Mobile Adjustments */
 @media (max-width: 520px){
   .title{ font-size: 28px; }
   .question-text{ font-size: 18px; }
   .intro-photo-couple{ width: 150px; height: 150px; }
   .lock-screen{ font-size: 26px; }
+  
+  /* FIX FOR VISUAL BOX ISSUES ON MOBILE */
+  .ai-box {
+    font-size: 13px; /* Smaller font on mobile so lines fit */
+    padding: 12px;
+  }
+  .question-section {
+    padding: 18px; /* Slightly less padding to give content room */
+  }
 }
