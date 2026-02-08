@@ -53,7 +53,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   const vBadge = document.getElementById("versionBadge");
-  if(vBadge){ vBadge.textContent = config.version || "v5.1"; vBadge.classList.remove("hidden"); vBadge.addEventListener("click", () => vBadge.style.display = "none"); }
+  if(vBadge){ vBadge.textContent = config.version || "v5.2"; vBadge.classList.remove("hidden"); vBadge.addEventListener("click", () => vBadge.style.display = "none"); }
 
   setupModeToggle(); setupTimedPopup();
 
@@ -204,7 +204,7 @@ function setupExtras(){
 
   // 6. Rel Stats
   const rsDiv = document.getElementById("relStatsBox");
-  if(rsDiv && config.relStats){ rsDiv.innerHTML = `<b>Days Together:</b> ${config.relStats.days}<br><b>Fights Won:</b> ${config.relStats.fightsWon}<br><b>Pizzas:</b> ${config.relStats.pizzas}<br><b>Kisses:</b> ${config.relStats.kisses}`; }
+  if(rsDiv && config.relStats){ rsDiv.innerHTML = `<b>Days Together:</b> ${config.relStats.days}<br><b>Fights Won:</b> ${config.relStats.fightsWon}<br><b>Trips Together:</b> ${config.relStats.trips}<br><b>Kisses:</b> ${config.relStats.kisses}`; }
 
   // 7. Fortune Cookie
   const crackBtn = document.getElementById("crackCookieBtn"); const fortMsg = document.getElementById("fortuneMsg");
