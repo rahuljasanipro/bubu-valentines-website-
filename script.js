@@ -9,14 +9,15 @@ document.title = config.pageTitle || "Valentine 💝";
   r.style.setProperty("--bg2", config.colors.backgroundEnd);
   r.style.setProperty("--btn", config.colors.buttonBackground);
   r.style.setProperty("--btnHover", config.colors.buttonHover);
-  r.style.setProperty("--text", config.colors.textColor);
 })();
 
 /* ---------------- UTIL ---------------- */
 function showOnly(id){
   document.querySelectorAll(".question-section").forEach(s => s.classList.add("hidden"));
-  document.getElementById("timeline")?.classList.add("hidden");
-  document.getElementById("extras")?.classList.add("hidden");
+  const t = document.getElementById("timeline");
+  if (t) t.classList.add("hidden");
+  const x = document.getElementById("extras");
+  if (x) x.classList.add("hidden");
 
   const el = document.getElementById(id);
   if(el) el.classList.remove("hidden");
@@ -42,6 +43,42 @@ function flashWarning(warnEl, text){
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 function randFrom(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+/* ---------------- SUNSCREEN / SKINCARE MODE ---------------- */
+function applyAutoModeIfNoPreference(){
+  const saved = localStorage.getItem("val_mode");
+  if(saved) return;
+
+  const h = new Date().getHours();
+  // Night skincare default: 20:00 - 05:59
+  const night = (h >= 20 || h < 6);
+  localStorage.setItem("val_mode", night ? "skincare" : "sunscreen");
+}
+
+function applyMode(){
+  const modeBtn = document.getElementById("modeToggle");
+  const mode = localStorage.getItem("val_mode") || "sunscreen";
+
+  document.body.classList.toggle("skincare", mode === "skincare");
+  if(modeBtn){
+    modeBtn.textContent = mode === "skincare" ? "🌙 Night Skincare Mode" : "🧴 Sunscreen Mode";
+  }
+}
+
+function setupModeToggle(){
+  applyAutoModeIfNoPreference();
+  applyMode();
+
+  const modeBtn = document.getElementById("modeToggle");
+  if(!modeBtn) return;
+
+  modeBtn.addEventListener("click", ()=>{
+    const current = localStorage.getItem("val_mode") || "sunscreen";
+    const next = current === "skincare" ? "sunscreen" : "skincare";
+    localStorage.setItem("val_mode", next);
+    applyMode();
+  });
+}
 
 /* ---------------- YOUTUBE MUSIC ---------------- */
 let ytPlayer = null;
@@ -125,31 +162,22 @@ function createFloating(){
   });
 }
 
-/* ---------------- CURSOR TRAIL ---------------- */
-function setupCursorTrail(){
-  document.addEventListener("mousemove", (e)=>{
-    const h = document.createElement("div");
-    h.className = "cursor-heart";
-    h.textContent = ["💗","💖","💘"][Math.floor(Math.random()*3)];
-    h.style.left = e.clientX + "px";
-    h.style.top  = e.clientY + "px";
-    document.body.appendChild(h);
-    setTimeout(()=> h.remove(), 800);
-  });
-}
-
-/* ---------------- CAMERA FLASH ---------------- */
+/* ---------------- CAMERA FLASH + SHAKE ---------------- */
 function cameraFlash(){
   const f = document.getElementById("flashOverlay");
-  if(!f) return;
-  f.classList.remove("hidden");
-  f.classList.remove("flash");
-  void f.offsetWidth;
-  f.classList.add("flash");
-  setTimeout(()=> f.classList.add("hidden"), 420);
+  if(f){
+    f.classList.remove("hidden");
+    f.classList.remove("flash");
+    void f.offsetWidth;
+    f.classList.add("flash");
+    setTimeout(()=> f.classList.add("hidden"), 420);
+  }
+
+  document.body.classList.add("shake");
+  setTimeout(()=> document.body.classList.remove("shake"), 260);
 }
 
-/* ---------------- LIE DETECTOR ---------------- */
+/* ---------------- LIE DETECTOR OVERLAY ---------------- */
 let lieBusy = false;
 async function lieDetectorScan(message){
   if(lieBusy) return;
@@ -231,7 +259,7 @@ function runIncomingCall(){
   });
 }
 
-/* ---------------- LOVE METER + SMART REACTIONS ---------------- */
+/* ---------------- LOVE METER “TO INFINITY” ---------------- */
 function setupLoveMeter(){
   const loveMeter = document.getElementById("loveMeter");
   const loveValue = document.getElementById("loveValue");
@@ -249,29 +277,64 @@ function setupLoveMeter(){
     else if(v < 300) smart.textContent = "😌 good human";
     else if(v < 1200) smart.textContent = "🥰 obsessed";
     else if(v < 5000) smart.textContent = "🚀 dangerous love";
-    else smart.textContent = "💘 GOD MODE";
+    else if(v < 20000) smart.textContent = "💘 GOD MODE";
+    else smart.textContent = "♾️ INFINITE LOVE";
+  }
+
+  function updateInfinityBar(v){
+    // Start expanding after 100
+    if(v <= 100){
+      loveMeter.style.width = "100%";
+      return;
+    }
+    // Expand up to +200% extra width max
+    const overflow = Math.min(1, (v - 100) / 5000);
+    const extra = overflow * (window.innerWidth * 0.8);
+    loveMeter.style.width = `calc(100% + ${extra}px)`;
   }
 
   loveMeter.addEventListener("input", ()=>{
     const v = parseInt(loveMeter.value, 10);
-    loveValue.textContent = String(v);
+
+    // show ∞ vibe at huge values
+    if(v >= 50000){
+      loveValue.textContent = "∞";
+    }else{
+      loveValue.textContent = String(v);
+    }
+
     setSmart(v);
+    updateInfinityBar(v);
 
     if(v > 100){
       extraLove.classList.remove("hidden");
-      if(v >= 5000){
+
+      if(v >= 20000){
+        extraLove.textContent = "♾️ Okay this is literally infinite love";
+        extraLove.classList.add("super-love");
+      } else if(v >= 5000){
         extraLove.textContent = config.loveMessages?.extreme || "WOOOOW 🥰🚀💝";
         extraLove.classList.add("super-love");
-      }else if(v > 1000){
+      } else if(v > 1000){
         extraLove.textContent = config.loveMessages?.high || "To infinity and beyond! 🚀💝";
         extraLove.classList.remove("super-love");
-      }else{
+      } else {
         extraLove.textContent = config.loveMessages?.normal || "And beyond! 🥰";
         extraLove.classList.remove("super-love");
       }
-    }else{
+    } else {
       extraLove.classList.add("hidden");
       extraLove.classList.remove("super-love");
+    }
+  });
+
+  window.addEventListener("resize", ()=>{
+    const v = parseInt(loveMeter.value, 10);
+    if(v > 100) {
+      // recompute width on resize
+      const overflow = Math.min(1, (v - 100) / 5000);
+      const extra = overflow * (window.innerWidth * 0.8);
+      loveMeter.style.width = `calc(100% + ${extra}px)`;
     }
   });
 }
@@ -463,29 +526,6 @@ function showLockScreenThen(next){
   }, 1500);
 }
 
-/* ---------------- NIGHT SKINCARE MODE ---------------- */
-function setupDarkMode(){
-  const btn = document.getElementById("darkModeToggle");
-  if(!btn) return;
-
-  const saved = localStorage.getItem("val_dark") === "1";
-  if(saved) document.body.classList.add("dark");
-
-  const setLabel = () => {
-    btn.textContent = document.body.classList.contains("dark")
-      ? "🧴 Night Skincare Mode: ON"
-      : "🌙 Night Skincare Mode";
-  };
-  setLabel();
-
-  btn.addEventListener("click", ()=>{
-    document.body.classList.toggle("dark");
-    const isDark = document.body.classList.contains("dark");
-    localStorage.setItem("val_dark", isDark ? "1" : "0");
-    setLabel();
-  });
-}
-
 /* ---------------- TIMED POPUP ---------------- */
 function setupTimedPopup(){
   setTimeout(()=>{
@@ -495,15 +535,13 @@ function setupTimedPopup(){
   }, 20000);
 }
 
-/* ---------------- WHY LOVE / HUGS / PROMISE WALL ---------------- */
+/* ---------------- EXTRAS ---------------- */
 function setupExtras(){
   const whyBtn = document.getElementById("whyLoveBtn");
   const whyText = document.getElementById("whyLoveText");
-
   const hugBtn = document.getElementById("hugBtn");
   const hugCountEl = document.getElementById("hugCount");
   const hugMsg = document.getElementById("hugMsg");
-
   const wall = document.getElementById("promiseWall");
   const shuffle = document.getElementById("shufflePromises");
 
@@ -521,15 +559,14 @@ function setupExtras(){
       hugCount++;
       hugCountEl.textContent = String(hugCount);
 
-      const msgs = config.hugMessages || ["Warm hug 🤗","Tight hug 😌","Infinity hug 🚀🤗"];
-
-      // Special milestones
-      if(hugCount === 5) hugMsg.textContent = "5 hugs collected… obsessed? 😳🤗";
-      else if(hugCount === 10) hugMsg.textContent = "10 hugs… ok you win 😭💗";
-      else if(hugCount === 15) hugMsg.textContent = "15 hugs… skincare-safe only 😄🧴";
-      else if(hugCount === 20) hugMsg.textContent = "20 hugs… marriage vibes 😌💍";
-      else if(hugCount === 30) hugMsg.textContent = "30 hugs… certified cuddle monster 🏆🤗";
-      else hugMsg.textContent = msgs[(hugCount - 1) % msgs.length];
+      const msgs = [
+        "Warm hug 🤗",
+        "Tight hug 😌",
+        "Banaras hug 🛕🤗",
+        "Ok too tight 😭",
+        "Infinity hug 🚀🤗"
+      ];
+      hugMsg.textContent = msgs[Math.min(hugCount-1, msgs.length-1)];
     });
   }
 
@@ -545,85 +582,41 @@ function setupExtras(){
       const tile = document.createElement("div");
       tile.className = "promise-tile";
       tile.textContent = p;
-      tile.addEventListener("click", ()=>{
-        tile.classList.toggle("done");
-      });
+      tile.addEventListener("click", ()=> tile.classList.toggle("done"));
       wall.appendChild(tile);
     });
   }
 
-  if(shuffle){
-    shuffle.addEventListener("click", renderPromises);
-  }
+  if(shuffle) shuffle.addEventListener("click", renderPromises);
   renderPromises();
 }
 
-/* ---------------- FUTURE TIMELINE GENERATOR ---------------- */
-function setupFutureGenerator(){
+/* ---------------- FUTURE TIMELINE (ONE ITEM, ORDERED) ---------------- */
+function setupFutureOneAtATime(){
   const btn = document.getElementById("genFutureBtn");
-  const list = document.getElementById("futureList");
-  if(!btn || !list) return;
+  const out = document.getElementById("futureOne");
+  if(!btn || !out) return;
+
+  const seq = config.futureTimelineOrdered || [];
+  let idx = 0;
 
   btn.addEventListener("click", ()=>{
-    const item = document.createElement("div");
-    item.className = "future-item";
-    item.textContent = randFrom(config.futureTemplates || ["Future: still together 💘"]);
-    list.prepend(item);
+    if(seq.length === 0) return;
+    out.textContent = seq[idx];
+    idx = Math.min(seq.length - 1, idx + 1);
+
+    if(idx === seq.length - 1 && out.textContent === seq[seq.length - 1]){
+      btn.textContent = "Done 😌💘";
+      btn.disabled = true;
+      btn.style.opacity = "0.75";
+      btn.style.cursor = "not-allowed";
+    }
   });
 }
 
-/* ---------------- START OVER RESET ---------------- */
-function setupStartOver(musicToggle){
-  const startOverBtn = document.getElementById("startOverBtn");
-  if(!startOverBtn) return;
-
-  startOverBtn.addEventListener("click", ()=>{
-    stopYtMusic();
-    if(musicToggle) musicToggle.textContent = "🎵 Play Music";
-
-    // Reset moved "No" buttons
-    const resetBtn = (id) => {
-      const b = document.getElementById(id);
-      if(!b) return;
-      b.style.position = "";
-      b.style.left = "";
-      b.style.top = "";
-      b.style.transform = "";
-      b.classList.add("no-bounce");
-    };
-    resetBtn("noBtn1");
-    resetBtn("noBtn3");
-
-    // Reset love meter
-    const loveMeter = document.getElementById("loveMeter");
-    const loveValue = document.getElementById("loveValue");
-    const extraLove = document.getElementById("extraLove");
-    const smart = document.getElementById("smartReaction");
-    if(loveMeter) loveMeter.value = 100;
-    if(loveValue) loveValue.textContent = "100";
-    if(extraLove){ extraLove.classList.add("hidden"); extraLove.textContent = ""; extraLove.classList.remove("super-love"); }
-    if(smart) smart.textContent = "🙂 hmm okay";
-
-    // Reset captcha checkbox
-    const captchaCheck = document.getElementById("captchaCheck");
-    if(captchaCheck) captchaCheck.checked = false;
-
-    // Hide long sections
-    document.getElementById("timeline")?.classList.add("hidden");
-    document.getElementById("extras")?.classList.add("hidden");
-
-    // Show intro overlay again
-    const overlay = document.getElementById("introOverlay");
-    if(overlay) overlay.style.display = "flex";
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-}
-
-/* ---------------- MAIN INIT ---------------- */
+/* ---------------- INIT ---------------- */
 window.addEventListener("DOMContentLoaded", async () => {
-  setupDarkMode();
-  setupCursorTrail();
+  setupModeToggle();
   setupTimedPopup();
 
   // Music toggle
@@ -640,19 +633,14 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  setupStartOver(musicToggle);
-
-  // Set texts from config
+  // Texts
   const title = document.getElementById("valentineTitle");
-  if(title) title.textContent = `${config.valentineName || "My Love"}, my love...`;
-
-  // Title easter egg
   if(title){
+    title.textContent = `${config.valentineName || "My Love"}, my love...`;
     title.style.cursor = "pointer";
     title.addEventListener("click", ()=> alert("💌 Secret unlocked:\nYou are my favorite human. Always."));
   }
 
-  // Fill question text
   document.getElementById("question1Text").textContent = config.questions?.first?.text || "Do you like me?";
   document.getElementById("yesBtn1").textContent = config.questions?.first?.yesBtn || "Yes";
   document.getElementById("noBtn1").textContent = config.questions?.first?.noBtn || "No";
@@ -665,10 +653,11 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("yesBtn3").textContent = config.questions?.third?.yesBtn || "Yes!";
   document.getElementById("noBtn3").textContent = config.questions?.third?.noBtn || "No";
 
+  // Floating + meter
   createFloating();
   setupLoveMeter();
   setupExtras();
-  setupFutureGenerator();
+  setupFutureOneAtATime();
 
   const fw = setupFireworks();
 
@@ -702,6 +691,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     alert(config.questions?.first?.secretAnswer || "I love you ❤️");
   });
 
+  // CAPTCHA -> Q2
   setupCaptcha(()=> showOnly("question2"));
 
   // Q2 -> compat -> AI -> Q3
@@ -715,18 +705,13 @@ window.addEventListener("DOMContentLoaded", async () => {
   const yes3 = document.getElementById("yesBtn3");
   const no3 = document.getElementById("noBtn3");
   const warn3 = document.getElementById("systemWarning3");
+
   demonNoStartsNice(no3, yes3, warn3);
 
   yes3.addEventListener("click", ()=>{
-    cameraFlash();
+    cameraFlash(); // improved camera effect
     showLockScreenThen(()=>{
       showOnly("celebration");
-
-      // Heartbeat hint on celebration buttons
-      ["seeTimelineBtn","openExtrasBtn","startOverBtn"].forEach(id=>{
-        const b = document.getElementById(id);
-        if(b) b.classList.add("heartbeat-hint");
-      });
 
       const ct = document.getElementById("celebrationTitle");
       const cm = document.getElementById("celebrationMessage");
@@ -741,23 +726,29 @@ window.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Timeline
-  document.getElementById("seeTimelineBtn")?.addEventListener("click", ()=>{
-    const tl = document.getElementById("timeline");
-    if(!tl) return;
-    tl.classList.remove("hidden");
-    tl.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
+  const seeTl = document.getElementById("seeTimelineBtn");
+  const tl = document.getElementById("timeline");
+  if(seeTl && tl){
+    seeTl.addEventListener("click", ()=>{
+      tl.classList.remove("hidden");
+      tl.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
-  // Surprise (Extras)
-  document.getElementById("openExtrasBtn")?.addEventListener("click", ()=>{
-    const extras = document.getElementById("extras");
-    if(!extras) return;
-    extras.classList.remove("hidden");
-    extras.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-
-  document.getElementById("backFromExtras")?.addEventListener("click", ()=>{
-    document.getElementById("extras")?.classList.add("hidden");
-    showOnly("celebration");
-  });
+  // Extras
+  const openExtras = document.getElementById("openExtrasBtn");
+  const extras = document.getElementById("extras");
+  const back = document.getElementById("backFromExtras");
+  if(openExtras && extras){
+    openExtras.addEventListener("click", ()=>{
+      extras.classList.remove("hidden");
+      extras.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+  if(back && extras){
+    back.addEventListener("click", ()=>{
+      extras.classList.add("hidden");
+      showOnly("celebration");
+    });
+  }
 });
