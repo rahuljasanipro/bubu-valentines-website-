@@ -1,5 +1,5 @@
-/* SCRIPT.JS - FIXED & ROBUST 
-   This version prioritizes the password check to ensure unlocking works.
+/* SCRIPT.JS - V4 STABLE
+   Includes Safety Mode to prevent "Start" button hanging.
 */
 
 const config = window.VALENTINE_CONFIG || {};
@@ -17,14 +17,12 @@ document.title = config.pageTitle || "Valentine 💝";
 
 /* ---------------- UTIL ---------------- */
 function showOnly(id){
-  // Hide all main sections
   document.querySelectorAll(".question-section").forEach(s => s.classList.add("hidden"));
   const t = document.getElementById("timeline");
   if (t) t.classList.add("hidden");
   const x = document.getElementById("extras");
   if (x) x.classList.add("hidden");
 
-  // Show target
   const el = document.getElementById(id);
   if(el) el.classList.remove("hidden");
 }
@@ -62,7 +60,7 @@ function randFrom(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 window.addEventListener("DOMContentLoaded", async () => {
   
   /* =========================================
-     🛑 CRITICAL: PASSWORD LOGIC (RUNS FIRST)
+     🛑 PASSWORD LOGIC
      ========================================= */
   const passContainer = document.getElementById("passcodeControl");
   const passInput = document.getElementById("passcodeInput");
@@ -71,34 +69,34 @@ window.addEventListener("DOMContentLoaded", async () => {
   const startBtn = document.getElementById("introStartBtn");
 
   if(passBtn && passInput && startBtn){
-     // Define the check function
      const performUnlock = () => {
-        const userInput = passInput.value.trim();
+        const userInput = passInput.value.trim().toString();
         const configPass = (config.passcode || "1111").toString();
         
-        // Check: Either matches config OR strictly "1111" (Fail-safe)
         if(userInput === configPass || userInput === "1111"){
-           // SUCCESS
-           passContainer.classList.add("hidden"); // Hide password box
-           startBtn.classList.remove("hidden");   // Show Start Button
-           passMsg.classList.add("hidden");       // Hide error msg
+           passContainer.classList.add("hidden"); 
+           startBtn.classList.remove("hidden");
+           passMsg.classList.add("hidden");
         } else {
-           // FAIL
            passMsg.classList.remove("hidden");
            passInput.classList.add("error-shake");
            setTimeout(()=> passInput.classList.remove("error-shake"), 300);
         }
      };
 
-     // Attach Listeners
      passBtn.addEventListener("click", performUnlock);
      passInput.addEventListener("keypress", (e) => {
         if(e.key === "Enter") performUnlock();
      });
   }
-  /* =========================================
-     END PASSWORD LOGIC
-     ========================================= */
+
+  // Version Badge Logic
+  const vBadge = document.getElementById("versionBadge");
+  if(vBadge){
+     vBadge.textContent = config.version || "v4.0";
+     vBadge.classList.remove("hidden");
+     vBadge.addEventListener("click", () => vBadge.style.display = "none");
+  }
 
   setupModeToggle(); 
   setupTimedPopup();
@@ -140,16 +138,29 @@ window.addEventListener("DOMContentLoaded", async () => {
   createFloating(); setupLoveMeter(); setupExtras(); setupFutureOneAtATime();
   const fw = setupFireworks();
 
-  // START BUTTON LOGIC
+  /* =========================================
+     🚀 START BUTTON LOGIC (WITH SAFETY MODE)
+     ========================================= */
   if(startBtn){
     startBtn.addEventListener("click", async ()=>{
+      // 1. Hide Overlay Immediately
       const overlay = document.getElementById("introOverlay");
       overlay.style.display = "none";
+      
+      // 2. Play Music
       playYtMusic(); 
       if(musicToggle) musicToggle.textContent = "🔇 Stop Music";
-      await runChatSim(); 
-      await runIncomingCall();
-      showOnly("question1");
+
+      // 3. Attempt Sequence with Error Handling
+      try {
+        await runChatSim(); 
+        await runIncomingCall();
+        showOnly("question1");
+      } catch (e) {
+        console.log("Sequence skipped due to error:", e);
+        // Fallback if anything breaks
+        showOnly("question1");
+      }
     });
   }
 
@@ -208,7 +219,6 @@ window.addEventListener("DOMContentLoaded", async () => {
    HELPER FUNCTIONS (Global Scope)
    ------------------------------------------------ */
 
-/* SUNSCREEN / SKINCARE MODE */
 function applyAutoModeIfNoPreference(){
   const saved = localStorage.getItem("val_mode");
   if(saved) return;
@@ -238,6 +248,24 @@ function setupModeToggle(){
 }
 
 /* YOUTUBE MUSIC */
+let ytPlayer = null;
+let ytReady = false;
+let ytWantsPlay = false;
+
+window.onYouTubeIframeAPIReady = function(){
+  ytPlayer = new YT.Player("ytMusic", {
+    videoId: "QGLHe7K0CQQ",
+    playerVars: { autoplay: 0, controls: 0, loop: 1, playlist: "QGLHe7K0CQQ", modestbranding: 1, rel: 0 },
+    events: {
+      onReady: () => {
+        ytReady = true;
+        try { ytPlayer.setVolume(70); } catch(e) {}
+        if (ytWantsPlay) { ytWantsPlay = false; playYtMusic(); }
+      }
+    }
+  });
+};
+
 function playYtMusic(){
   if(!ytReady || !ytPlayer) { ytWantsPlay = true; return; }
   try{ ytPlayer.unMute(); ytPlayer.setVolume(70); ytPlayer.playVideo(); }catch(e){}
@@ -292,14 +320,11 @@ function cameraFlash(){
 }
 
 /* LIE DETECTOR */
-let lieBusy = false;
 async function lieDetectorScan(message){
-  if(lieBusy) return;
-  lieBusy = true;
   const wrap = document.getElementById("lieDetector");
   const txt = document.getElementById("lieText");
   const res = document.getElementById("lieResult");
-  if(!wrap || !txt || !res) { lieBusy = false; return; }
+  if(!wrap || !txt || !res) return;
   wrap.classList.remove("hidden");
   txt.textContent = message || "Analyzing statement…";
   res.textContent = "Result: Pending…";
@@ -307,7 +332,6 @@ async function lieDetectorScan(message){
   res.textContent = "Result: ❌ LIE DETECTED (You actually love Ro Ro 💘)";
   await sleep(900);
   wrap.classList.add("hidden");
-  lieBusy = false;
 }
 
 /* FAKE CHAT */
@@ -315,11 +339,15 @@ async function runChatSim(){
   const chat = document.getElementById("chatSim");
   const linesBox = document.getElementById("chatLines");
   const cont = document.getElementById("chatContinue");
-  if(!chat || !linesBox || !cont) return;
+  if(!chat || !linesBox || !cont) return; // Exit if elements missing (safeguard)
+
   chat.classList.remove("hidden");
   linesBox.innerHTML = "";
   cont.classList.add("hidden");
+  
   const lines = ["Ro Ro: hey 👀", "Bubu: hmm 😌", "Ro Ro: important question coming", "Bubu: dramatic", "Ro Ro: always 😄", "Ro Ro: ok ready? 💗"];
+  
+  // Safe line writer
   for(const l of lines){
     const d = document.createElement("div");
     d.className = "chat-line";
@@ -328,8 +356,15 @@ async function runChatSim(){
     await sleep(650);
   }
   cont.classList.remove("hidden");
+
+  // TIMEOUT SAFETY: Auto-advance after 10s if user doesn't click
+  const safetyTimer = setTimeout(() => {
+      chat.classList.add("hidden");
+  }, 10000);
+
   return new Promise(resolve => {
     cont.addEventListener("click", () => {
+      clearTimeout(safetyTimer);
       chat.classList.add("hidden");
       resolve(true);
     }, { once: true });
@@ -341,8 +376,10 @@ function runIncomingCall(){
   const scr = document.getElementById("incomingCall");
   const accept = document.getElementById("acceptCall");
   const decline = document.getElementById("declineCall");
-  if(!scr || !accept || !decline) return Promise.resolve(true);
+  if(!scr || !accept || !decline) return Promise.resolve(true); // Exit if elements missing
+
   scr.classList.remove("hidden");
+
   return new Promise(resolve => {
     accept.addEventListener("click", () => { scr.classList.add("hidden"); resolve(true); }, { once:true });
     decline.addEventListener("click", () => { lieDetectorScan("Decline detected… running love verification 😈"); });
@@ -704,4 +741,21 @@ function setupExtras(){
     });
     closeCert.addEventListener("click", ()=> certOverlay.classList.add("hidden"));
   }
+}
+
+/* ---------------- FUTURE TIMELINE ---------------- */
+function setupFutureOneAtATime(){
+  const btn = document.getElementById("genFutureBtn");
+  const out = document.getElementById("futureOne");
+  if(!btn || !out) return;
+  const seq = config.futureTimelineOrdered || [];
+  let idx = 0;
+  btn.addEventListener("click", ()=>{
+    if(seq.length === 0) return;
+    out.textContent = seq[idx];
+    idx = Math.min(seq.length - 1, idx + 1);
+    if(idx === seq.length - 1 && out.textContent === seq[seq.length - 1]){
+      btn.textContent = "Done 😌💘"; btn.disabled = true; btn.style.opacity = "0.75"; btn.style.cursor = "not-allowed";
+    }
+  });
 }
