@@ -1,6 +1,6 @@
 const CONFIG = {
   // 🏷️ UI VERSION
-  version: "v5.3 (Master Key Added) 💗",
+  version: "v5.3 💗",
 
   // 🔑 PASSWORDS
   passcode: "1111",   // Normal Start
