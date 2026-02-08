@@ -92,7 +92,8 @@ body{
   border-radius: 22px;
   box-shadow: var(--shadow);
   margin: 18px auto 0;
-  width: min(780px, 92vw);
+  width: min(780px, 92vw); /* Ensure it fits on mobile */
+  max-width: 100%;
 }
 
 .question-text{
@@ -245,7 +246,7 @@ body{
 
 /* CAPTCHA alignment fixes */
 .captcha-box{
-  width: min(520px, 92vw);
+  width: 100%;
   margin: 0 auto;
   display:flex;
   flex-direction:column;
@@ -256,22 +257,29 @@ body{
   font-weight: 950;
   margin-bottom: 0;
   text-align:center;
+  font-size: 18px;
 }
 .captcha-row{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap: 10px;
+  gap: 12px;
   padding: 14px 14px;
   border-radius: 14px;
   background: rgba(255,255,255,0.55);
   backdrop-filter: blur(10px);
   font-weight: 900;
+  text-align: left; /* Ensure text doesn't center weirdly on wrap */
 }
 .captcha-row input{
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0; /* Prevents checkbox from squishing */
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0; /* Important: prevents checkbox from squishing */
+  margin: 0;
+}
+.captcha-row span {
+  font-size: 16px;
+  line-height: 1.3;
 }
 .captcha-btn{
   width: 100%;
@@ -302,23 +310,23 @@ body{
   font-weight: 900;
 }
 
-/* AI box alignment fix - CRITICAL FIX FOR MOBILE */
+/* AI box alignment fix */
 .ai-box{
   margin: 10px auto 14px;
-  width: min(760px, 100%); /* Use 100% of container */
+  width: 100%;
   background: rgba(0,0,0,0.08);
   padding: 16px;
   border-radius: 16px;
   text-align:left;
   font-weight: 900;
   
-  /* Fix text overflow */
-  white-space: pre-wrap; 
-  word-wrap: break-word;
-  word-break: break-word; /* Ensures long lines break */
-  overflow-wrap: break-word;
-  line-height: 1.4;
-  font-size: 14px; /* Slightly smaller default for safety */
+  /* CRITICAL MOBILE FIXES */
+  white-space: pre-wrap;       /* Preserve newlines */
+  word-wrap: break-word;       /* Break long words if needed */
+  overflow-wrap: break-word;   /* Standard property for breaking */
+  word-break: break-word;      /* Non-standard but helpful backup */
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 /* Celebration */
@@ -554,19 +562,29 @@ body.skincare .promise-tile{
   color: #f2f2f2;
 }
 
-/* Mobile Adjustments */
+/* Mobile Adjustments - STRONGER FIXES */
 @media (max-width: 520px){
   .title{ font-size: 28px; }
   .question-text{ font-size: 18px; }
   .intro-photo-couple{ width: 150px; height: 150px; }
   .lock-screen{ font-size: 26px; }
   
-  /* FIX FOR VISUAL BOX ISSUES ON MOBILE */
-  .ai-box {
-    font-size: 13px; /* Smaller font on mobile so lines fit */
-    padding: 12px;
-  }
+  /* Fix box sizing and padding on mobile */
   .question-section {
-    padding: 18px; /* Slightly less padding to give content room */
+    padding: 16px;
+    width: 94vw; /* Slightly wider to give content room */
+  }
+  
+  .ai-box {
+    font-size: 12px; /* Smaller font so code-style text fits */
+    padding: 12px;
+    margin: 8px 0;
+  }
+  
+  .captcha-row {
+     padding: 12px;
+  }
+  .captcha-row span {
+     font-size: 14px; /* Slightly smaller text for checkbox */
   }
 }
