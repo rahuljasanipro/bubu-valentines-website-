@@ -1,5 +1,8 @@
 const CONFIG = {
-  // 🔑 PASSWORD TO UNLOCK (Must be a string)
+  // 🏷️ UI VERSION
+  version: "v4.0 (Stable) 🚀",
+
+  // 🔑 PASSWORD TO UNLOCK
   passcode: "1111",
 
   valentineName: "Bubu",
@@ -66,7 +69,6 @@ const CONFIG = {
     "I promise movie nights 🎬"
   ],
 
-  // New Features Data
   loveCoupons: [
     { text: "One Free Massage 💆‍♀️", desc: "Redeemable anytime" },
     { text: "Dinner of Your Choice 🍕", desc: "I pay, you eat" },
