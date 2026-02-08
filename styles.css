@@ -1,31 +1,85 @@
-:root{
-  --bg1:#ffafbd;
-  --bg2:#ffc3a0;
-  --btn:#ff6b6b;
-  --btnHover:#ff8787;
-  --text:#ff4757;
-  --card: rgba(255,255,255,0.82);
-  --shadow: 0 20px 60px rgba(0,0,0,0.18);
+/* ---------- Base ---------- */
+
+* {
+  box-sizing: border-box;
 }
 
-body{
-  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ffafbd, #ffc3a0);
   color: #222;
+  overflow-x: hidden;
 }
 
-body.dark{
-  --card: rgba(20,20,24,0.85);
-  color: #f2f2f2;
-  background: radial-gradient(circle at top, #2b2b35, #121218);
+.hidden {
+  display: none !important;
 }
 
-body.dark .container,
-body.dark .intro-card{
-  background: var(--card);
-  color:#f2f2f2;
+/* ---------- Containers ---------- */
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 80px 20px 60px;
+  text-align: center;
 }
 
-.top-controls{
+.title {
+  font-size: 40px;
+  margin-bottom: 30px;
+}
+
+/* ---------- Intro Overlay ---------- */
+
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #ffafbd, #ffc3a0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.intro-card {
+  background: rgba(255,255,255,0.9);
+  padding: 28px;
+  border-radius: 22px;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+  max-width: 340px;
+  width: 92%;
+}
+
+.intro-title {
+  margin: 14px 0 6px;
+}
+
+.intro-subtitle {
+  opacity: 0.8;
+  margin-bottom: 14px;
+}
+
+.intro-hint {
+  margin-top: 10px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.intro-photo-couple {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 20px;
+  border: 5px solid #fff;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.2);
+}
+
+/* ---------- Top Controls ---------- */
+
+.top-controls {
   position: fixed;
   top: 14px;
   right: 14px;
@@ -34,85 +88,245 @@ body.dark .intro-card{
   z-index: 9999;
 }
 
-.chip{
+.chip {
   padding: 10px 14px;
   border-radius: 999px;
-  border: 0;
+  border: none;
   cursor: pointer;
-  background: rgba(255,255,255,0.7);
+  font-weight: 600;
+  background: rgba(255,255,255,0.75);
   backdrop-filter: blur(10px);
   box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-  font-weight: 600;
 }
-body.dark .chip{ background: rgba(30,30,40,0.75); color:#fff; }
 
-.system-warning{
-  margin-top: 14px;
-  padding: 12px 14px;
+/* ---------- Questions ---------- */
+
+.question-section {
+  background: rgba(255,255,255,0.82);
+  padding: 26px;
+  border-radius: 22px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  margin-top: 18px;
+}
+
+.question-text {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  border: none;
   border-radius: 14px;
+  padding: 14px 20px;
+  font-size: 16px;
+  cursor: pointer;
   font-weight: 700;
-  background: rgba(255, 77, 77, 0.18);
-  border: 1px solid rgba(255, 77, 77, 0.35);
-  color: #ff3b3b;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s;
 }
-body.dark .system-warning{ color:#ff6b6b; }
 
-.fireworks-canvas{
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-yes {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.btn-yes:hover {
+  background: #ff8787;
+}
+
+.btn-no {
+  background: #eee;
+}
+
+.btn-next,
+.btn-secret {
+  background: #ff6b6b;
+  color: #fff;
+  margin-top: 12px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ---------- Love Meter ---------- */
+
+.meter-wrap {
+  margin: 16px 0;
+}
+
+.meter-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.love-meter {
+  width: 100%;
+}
+
+.extra-love {
+  margin-top: 10px;
+  font-weight: 700;
+}
+
+.super-love {
+  font-size: 20px;
+}
+
+/* ---------- Floating Emojis ---------- */
+
+.floating-elements {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 9998;
+  overflow: hidden;
 }
 
-.game-ui{
-  display:flex;
-  align-items:center;
-  justify-content: center;
-  gap: 14px;
-  margin: 10px 0 16px;
+.heart,
+.bear {
+  position: absolute;
+  font-size: 24px;
+  animation: floatUp linear infinite;
+  opacity: 0.8;
 }
-.game-badge{
+
+@keyframes floatUp {
+  from {
+    transform: translateY(110vh);
+  }
+  to {
+    transform: translateY(-10vh);
+  }
+}
+
+/* ---------- System Warning ---------- */
+
+.system-warning {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  font-weight: 700;
+  background: rgba(255,77,77,0.18);
+  border: 1px solid rgba(255,77,77,0.35);
+  color: #ff3b3b;
+}
+
+/* ---------- Mini Game ---------- */
+
+.game-ui {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.game-badge {
   padding: 8px 12px;
   border-radius: 999px;
   background: rgba(255,255,255,0.6);
-  backdrop-filter: blur(10px);
   font-weight: 700;
 }
-body.dark .game-badge{ background: rgba(30,30,40,0.6); }
 
-.game-area{
+.game-area {
   position: relative;
   width: min(680px, 92vw);
   height: 320px;
   margin: 0 auto;
   border-radius: 22px;
   background: rgba(255,255,255,0.45);
-  backdrop-filter: blur(10px);
   overflow: hidden;
-  box-shadow: var(--shadow);
 }
-body.dark .game-area{ background: rgba(30,30,40,0.55); }
 
-.game-heart{
-  position:absolute;
+.game-heart {
+  position: absolute;
   font-size: 28px;
   cursor: pointer;
-  user-select: none;
   transform: translate(-50%, -50%);
   animation: floaty 2.6s ease-in-out infinite;
 }
-@keyframes floaty{
-  0%{ transform: translate(-50%, -50%) scale(1); opacity: .95; }
-  50%{ transform: translate(-50%, -60%) scale(1.12); opacity: 1; }
-  100%{ transform: translate(-50%, -50%) scale(1); opacity: .95; }
+
+@keyframes floaty {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -60%) scale(1.15); }
+  100% { transform: translate(-50%, -50%) scale(1); }
 }
 
-.game-hint{
-  text-align:center;
-  margin-top: 10px;
-  opacity: 0.75;
+.game-hint {
+  margin-top: 8px;
+  opacity: 0.7;
   font-weight: 600;
 }
 
-/* Ensure hidden works */
-.hidden{ display:none !important; }
+/* ---------- Celebration ---------- */
+
+.celebrate-title {
+  font-size: 30px;
+}
+
+.celebrate-msg {
+  font-size: 20px;
+  margin: 12px 0;
+}
+
+.celebrate-emojis {
+  font-size: 28px;
+}
+
+/* ---------- Fireworks Canvas ---------- */
+
+.fireworks-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ---------- Dark Mode ---------- */
+
+body.dark {
+  background: radial-gradient(circle at top, #2b2b35, #121218);
+  color: #f2f2f2;
+}
+
+body.dark .question-section,
+body.dark .intro-card {
+  background: rgba(20,20,24,0.85);
+  color: #f2f2f2;
+}
+
+body.dark .chip {
+  background: rgba(30,30,40,0.8);
+  color: #fff;
+}
+
+body.dark .game-area {
+  background: rgba(30,30,40,0.55);
+}
+
+body.dark .game-badge {
+  background: rgba(30,30,40,0.6);
+}
+
+body.dark .btn-no {
+  background: #333;
+  color: #eee;
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 520px) {
+  .title { font-size: 28px; }
+  .question-text { font-size: 18px; }
+  .intro-photo-couple { width: 140px; height: 140px; }
+}
