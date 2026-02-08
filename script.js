@@ -53,7 +53,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   const vBadge = document.getElementById("versionBadge");
-  if(vBadge){ vBadge.textContent = config.version || "v5.0"; vBadge.classList.remove("hidden"); vBadge.addEventListener("click", () => vBadge.style.display = "none"); }
+  if(vBadge){ vBadge.textContent = config.version || "v5.1"; vBadge.classList.remove("hidden"); vBadge.addEventListener("click", () => vBadge.style.display = "none"); }
 
   setupModeToggle(); setupTimedPopup();
 
@@ -173,7 +173,8 @@ function setupExtras(){
   if(whyBtn && whyText){ reasonPool = (config.whyLoveReasons || ["You are amazing"]).slice(); shuffleArray(reasonPool); whyBtn.addEventListener("click", ()=>{ const reason = reasonPool[reasonIndex]; whyText.textContent = reason; reasonIndex++; if(reasonIndex >= reasonPool.length){ reasonIndex = 0; shuffleArray(reasonPool); } }); }
   if(hugBtn && hugCountEl && hugMsg){ hugBtn.addEventListener("click", ()=>{ hugCount++; hugCountEl.textContent = String(hugCount); const msgs = ["Warm hug 🤗","Tight hug 😌","Banaras hug 🛕🤗","Bear hug 🐻","Koala hug 🐨","Squishy hug ☁️","Running hug 🏃‍♀️💨","Sleepy hug 😴","Bubu hug 💗","Ro Ro hug 😈","Forever hug ♾️","Spicy hug 🌶️","Cozy hug 🧣","One more hug ☝️","Back hug 🙈","Forehead kiss hug 💋","Healing hug 🩹","Squeeze hug 😖","Ghost hug 👻","Virtual hug 💻","Emergency hug 🚨","Ok too tight 😭","Infinity hug 🚀🤗","Another one? 😳","Never letting go 😤","Glued together 🧴","Pocket hug 👖","Giant hug 🏰","Good morning hug ☀️","Goodnight hug 🌙"]; const index = (hugCount - 1) % msgs.length; hugMsg.textContent = msgs[index]; }); }
   
-  function renderPromises(){ if(!wall) return; wall.innerHTML = ""; const list = (config.promises || []).slice(); shuffleArray(list); list.slice(0, 12).forEach(p=>{ const tile = document.createElement("div"); tile.className = "promise-tile"; tile.textContent = p; tile.addEventListener("click", ()=> tile.classList.toggle("done")); wall.appendChild(tile); }); }
+  // PROMISE WALL: Show exactly 8 items
+  function renderPromises(){ if(!wall) return; wall.innerHTML = ""; const list = (config.promises || []).slice(); shuffleArray(list); list.slice(0, 8).forEach(p=>{ const tile = document.createElement("div"); tile.className = "promise-tile"; tile.textContent = p; tile.addEventListener("click", ()=> tile.classList.toggle("done")); wall.appendChild(tile); }); }
   if(shuffle) shuffle.addEventListener("click", renderPromises); renderPromises();
 
   // 1. Coupons
@@ -220,10 +221,6 @@ function setupExtras(){
   // 10. Bubu Mode
   const bubuBtn = document.getElementById("bubuModeBtn");
   if(bubuBtn){ bubuBtn.addEventListener("click", ()=>{ alert("Activating Bubu Mode... (Refresh page to stop)"); document.body.innerHTML = document.body.innerHTML.replace(/[a-zA-Z]+/g, "Bubu"); }); }
-
-  // 11. Virtual Pet
-  const feedBtn = document.getElementById("feedPetBtn"); const petStatus = document.getElementById("petStatus"); const petEmoji = document.getElementById("petEmoji");
-  if(feedBtn){ let food = 0; feedBtn.addEventListener("click", ()=>{ food++; if(food < 3) { petStatus.textContent = "Yum! 🍯"; petEmoji.textContent = "😋"; } else if (food < 6) { petStatus.textContent = "Full & Happy!"; petEmoji.textContent = "🥰"; } else { petStatus.textContent = "Too much honey! 😴"; petEmoji.textContent = "💤"; } }); }
 }
 
 function setupFutureOneAtATime(){ const btn = document.getElementById("genFutureBtn"); const out = document.getElementById("futureOne"); if(!btn || !out) return; const seq = config.futureTimelineOrdered || []; let idx = 0; btn.addEventListener("click", ()=>{ if(seq.length === 0) return; out.textContent = seq[idx]; idx = Math.min(seq.length - 1, idx + 1); if(idx === seq.length - 1 && out.textContent === seq[seq.length - 1]){ btn.textContent = "Done 😌💘"; btn.disabled = true; btn.style.opacity = "0.75"; btn.style.cursor = "not-allowed"; } }); }
