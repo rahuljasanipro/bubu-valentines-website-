@@ -156,7 +156,7 @@ const CONFIG = {
   bucketList: [
     "Visit Paris 🗼",
     "Own a Dog 🐶",
-    "Do an AOF Course Together 😊",
+    "Do an AOL Course Together 😊",
     "Go on a Northern Lights trip 🌌",
     "Build a pillow fort 🏰",
     "Marry you 💍",
