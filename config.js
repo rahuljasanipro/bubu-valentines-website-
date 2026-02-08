@@ -63,15 +63,31 @@ const CONFIG = {
     "I promise movie nights 🎬"
   ],
 
+  // New Features Data
+  loveCoupons: [
+    { text: "One Free Massage 💆‍♀️", desc: "Redeemable anytime" },
+    { text: "Dinner of Your Choice 🍕", desc: "I pay, you eat" },
+    { text: "Win an Argument Free Card 😤", desc: "Use wisely..." },
+    { text: "Movie Night Control 🎬", desc: "You pick the movie" },
+    { text: "Princess Treatment Day 👑", desc: "Breakfast in bed included" }
+  ],
+
+  certificate: {
+    title: "Certificate of Being the Best Bubu",
+    body: "This certifies that Bubu is officially the cutest, most amazing girlfriend in the world.",
+    signature: "Signed: Ro Ro 💘",
+    date: "February 14, 2026"
+  },
+
   // Ordered, one-at-a-time timeline from 2026 → 2060
   futureTimelineOrdered: [
     "2026 — More trips together 🌍",
     "2027 — Still flirting like day one 😌",
-    "2028 — Marriage by 2028 💍",
+    "2028 — Marriage by 2028 😤💍",
     "2029 — First BIG vacation together ✈️",
     "2032 — Still choosing you, always 💗",
     "2035 — Anniversary celebrations on max 🎉",
-    "2040 — Banaras 15.0 confirmed 🛕",
+    "2040 — Banaras 2.0 (and 3.0) confirmed 🛕",
     "2045 — Still laughing at the same jokes 😄",
     "2050 — Love level: infinite 🚀",
     "2060 — Still together. Still us 💘"
