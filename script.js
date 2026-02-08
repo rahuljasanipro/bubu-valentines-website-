@@ -31,21 +31,48 @@ function shuffleArray(array) { if(!array) return; for (let i = array.length - 1;
 function randFrom(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 
 window.addEventListener("DOMContentLoaded", async () => {
-  /* PASSWORD LOGIC */
+  /* PASSWORD LOGIC WITH MASTER KEY */
   const passContainer = document.getElementById("passcodeControl");
   const passInput = document.getElementById("passcodeInput");
   const passBtn = document.getElementById("passcodeBtn");
   const passMsg = document.getElementById("passcodeError");
   const startBtn = document.getElementById("introStartBtn");
 
+  const musicToggle = document.getElementById("musicToggle");
+  const fw = setupFireworks(); // Initialize Fireworks
+
   if(passBtn && passInput && startBtn){
      const performUnlock = () => {
         const userInput = passInput.value.trim().toString();
         const configPass = (config.passcode || "1111").toString();
-        if(userInput === configPass || userInput === "1111"){
-           passContainer.classList.add("hidden"); startBtn.classList.remove("hidden"); passMsg.classList.add("hidden");
+        const masterKey = (config.masterKey || "143").toString(); // Get Master Key
+
+        // CHECK 1: MASTER KEY (Instant Win)
+        if(userInput === masterKey){
+           document.getElementById("introOverlay").style.display = "none"; // Hide Intro
+           playYtMusic();
+           if(musicToggle) musicToggle.textContent = "🔇 Stop Music";
+           
+           showOnly("celebration"); // <--- JUMP TO END
+           
+           // Setup Celebration Text
+           const ct = document.getElementById("celebrationTitle");
+           const cm = document.getElementById("celebrationMessage");
+           const ce = document.getElementById("celebrationEmojis");
+           if(ct) ct.textContent = config.celebration?.title || "Yay! 🎉";
+           if(ce) ce.textContent = config.celebration?.emojis || "🎁💖";
+           if(cm) typeText(cm, config.celebration?.message || "Message", 32);
+           if(fw) fw.fire(); // Fire fireworks
+
+        // CHECK 2: NORMAL PASSWORD
+        } else if(userInput === configPass || userInput === "1111"){
+           passContainer.classList.add("hidden"); 
+           startBtn.classList.remove("hidden"); 
+           passMsg.classList.add("hidden");
         } else {
-           passMsg.classList.remove("hidden"); passInput.classList.add("error-shake"); setTimeout(()=> passInput.classList.remove("error-shake"), 300);
+           passMsg.classList.remove("hidden"); 
+           passInput.classList.add("error-shake"); 
+           setTimeout(()=> passInput.classList.remove("error-shake"), 300);
         }
      };
      passBtn.addEventListener("click", performUnlock);
@@ -53,11 +80,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   const vBadge = document.getElementById("versionBadge");
-  if(vBadge){ vBadge.textContent = config.version || "v5.2"; vBadge.classList.remove("hidden"); vBadge.addEventListener("click", () => vBadge.style.display = "none"); }
+  if(vBadge){ vBadge.textContent = config.version || "v5.3"; vBadge.classList.remove("hidden"); vBadge.addEventListener("click", () => vBadge.style.display = "none"); }
 
   setupModeToggle(); setupTimedPopup();
 
-  const musicToggle = document.getElementById("musicToggle");
   if(musicToggle){ musicToggle.addEventListener("click", ()=>{ if(isYtPlaying()){ stopYtMusic(); musicToggle.textContent = "🎵 Play Music"; } else{ playYtMusic(); musicToggle.textContent = "🔇 Stop Music"; } }); }
   
   const startOverBtn = document.getElementById("startOverBtn");
@@ -77,7 +103,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("noBtn3").textContent = config.questions?.third?.noBtn || "No";
 
   createFloating(); setupLoveMeter(); setupExtras(); setupFutureOneAtATime();
-  const fw = setupFireworks();
 
   if(startBtn){
     startBtn.addEventListener("click", async ()=>{
