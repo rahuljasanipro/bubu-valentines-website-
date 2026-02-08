@@ -18,25 +18,7 @@
       <h1 class="intro-title">Hey Bubu 👀💗</h1>
       <p class="intro-subtitle">Before you enter… promise you’ll smile 😌</p>
 
-      <button
-        id="introStartBtn"
-        type="button"
-        onclick="
-          const a=document.getElementById('bgMusic');
-          const o=document.getElementById('introOverlay');
-          const t=document.getElementById('musicToggle');
-          if(o) o.style.display='none';
-          if(a){
-            a.muted=false;
-            a.volume=0.85;
-            a.load();
-            a.play().then(()=>{ if(t) t.innerText='🔇 Stop Music'; })
-            .catch((e)=>{ alert('Tap 🎵 Play Music once to start'); console.log(e); });
-          }
-        "
-      >
-        Start 💖
-      </button>
+      <button id="introStartBtn" type="button">Start 💖</button>
 
       <p class="intro-hint">Psst: there’s a hidden surprise inside 👀</p>
     </div>
@@ -45,8 +27,14 @@
   <!-- Floating emojis -->
   <div class="floating-elements"></div>
 
-  <!-- Music toggle (top right) -->
-  <button id="musicToggle" class="music-toggle" type="button">🎵 Play Music</button>
+  <!-- Top-right controls -->
+  <div class="top-controls">
+    <button id="darkModeToggle" class="chip" type="button">🌙 Dark</button>
+    <button id="musicToggle" class="chip" type="button">🎵 Play Music</button>
+  </div>
+
+  <!-- Fireworks canvas -->
+  <canvas id="fireworksCanvas" class="fireworks-canvas"></canvas>
 
   <!-- Main container -->
   <main class="container">
@@ -64,6 +52,8 @@
       <button id="secretAnswerBtn" class="btn btn-secret" type="button">
         Secret 💌
       </button>
+
+      <div id="systemWarning" class="system-warning hidden"></div>
     </section>
 
     <!-- Question 2 -->
@@ -83,6 +73,17 @@
       <button id="nextBtn" class="btn btn-next" type="button">Next ❤️</button>
     </section>
 
+    <!-- MINI GAME: Catch Hearts -->
+    <section id="minigame" class="question-section hidden">
+      <p class="question-text">Quick game 😄 Catch <b>5 hearts</b> to unlock the final question 💘</p>
+      <div class="game-ui">
+        <div class="game-badge">Caught: <span id="caughtCount">0</span>/5</div>
+        <button id="startGameBtn" class="btn btn-next" type="button">Start Game 💞</button>
+      </div>
+      <div id="gameArea" class="game-area"></div>
+      <div id="gameHint" class="game-hint">Tip: click/tap the hearts fast!</div>
+    </section>
+
     <!-- Question 3 -->
     <section id="question3" class="question-section hidden">
       <p id="question3Text" class="question-text">Question 3</p>
@@ -91,6 +92,8 @@
         <button id="yesBtn3" class="btn btn-yes" type="button">Yes!! 💘</button>
         <button id="noBtn3" class="btn btn-no" type="button">No 😜</button>
       </div>
+
+      <div id="systemWarning3" class="system-warning hidden"></div>
     </section>
 
     <!-- Celebration -->
@@ -104,37 +107,12 @@
   <!-- Config -->
   <script src="config.js"></script>
 
-  <!-- Audio (local mp3) -->
+  <!-- Local audio -->
   <audio id="bgMusic" preload="auto" loop playsinline controls style="display:none;">
     <source src="assets/music.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Script -->
   <script src="script.js"></script>
-
-  <!-- Super reliable toggle -->
-  <script>
-    (function(){
-      const btn=document.getElementById('musicToggle');
-      const a=document.getElementById('bgMusic');
-      if(!btn || !a) return;
-
-      btn.addEventListener('click', async () => {
-        try{
-          if(a.paused){
-            a.muted=false; a.volume=0.85;
-            await a.play();
-            btn.innerText='🔇 Stop Music';
-          }else{
-            a.pause();
-            btn.innerText='🎵 Play Music';
-          }
-        }catch(e){
-          console.log(e);
-          alert('Tap again to allow audio 🎵');
-        }
-      });
-    })();
-  </script>
 </body>
 </html>
