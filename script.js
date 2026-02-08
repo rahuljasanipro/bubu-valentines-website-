@@ -559,14 +559,44 @@ function setupExtras(){
       hugCount++;
       hugCountEl.textContent = String(hugCount);
 
+      // Expanded to 30 options as requested
       const msgs = [
         "Warm hug 🤗",
         "Tight hug 😌",
         "Banaras hug 🛕🤗",
+        "Bear hug 🐻",
+        "Koala hug 🐨",
+        "Squishy hug ☁️",
+        "Running hug 🏃‍♀️💨",
+        "Sleepy hug 😴",
+        "Bubu hug 💗",
+        "Ro Ro hug 😈",
+        "Forever hug ♾️",
+        "Spicy hug 🌶️",
+        "Cozy hug 🧣",
+        "One more hug ☝️",
+        "Back hug 🙈",
+        "Forehead kiss hug 💋",
+        "Healing hug 🩹",
+        "Squeeze hug 😖",
+        "Ghost hug 👻",
+        "Virtual hug 💻",
+        "Emergency hug 🚨",
         "Ok too tight 😭",
-        "Infinity hug 🚀🤗"
+        "Infinity hug 🚀🤗",
+        "Another one? 😳",
+        "Never letting go 😤",
+        "Glued together 🧴",
+        "Pocket hug 👖",
+        "Giant hug 🏰",
+        "Good morning hug ☀️",
+        "Goodnight hug 🌙"
       ];
-      hugMsg.textContent = msgs[Math.min(hugCount-1, msgs.length-1)];
+      
+      // Cycle through messages or pick random? 
+      // Let's cycle but loop back if count exceeds length
+      const index = (hugCount - 1) % msgs.length;
+      hugMsg.textContent = msgs[index];
     });
   }
 
@@ -633,11 +663,12 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
   }
   
-  // Start Over button logic
+  // START OVER BUTTON LOGIC - FIXED
   const startOverBtn = document.getElementById("startOverBtn");
   if(startOverBtn){
      startOverBtn.addEventListener("click", ()=>{
-         window.location.reload();
+         // Force a hard reload from server/cache
+         window.location.href = window.location.href;
      });
   }
 
