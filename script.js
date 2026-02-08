@@ -1,6 +1,5 @@
-/* FORCE FIX APPLIED: 
-   Password is hardcoded to "1111" in this file 
-   to bypass any config.js errors.
+/* SCRIPT.JS - FIXED & ROBUST 
+   This version prioritizes the password check to ensure unlocking works.
 */
 
 const config = window.VALENTINE_CONFIG || {};
@@ -18,12 +17,14 @@ document.title = config.pageTitle || "Valentine 💝";
 
 /* ---------------- UTIL ---------------- */
 function showOnly(id){
+  // Hide all main sections
   document.querySelectorAll(".question-section").forEach(s => s.classList.add("hidden"));
   const t = document.getElementById("timeline");
   if (t) t.classList.add("hidden");
   const x = document.getElementById("extras");
   if (x) x.classList.add("hidden");
 
+  // Show target
   const el = document.getElementById(id);
   if(el) el.classList.remove("hidden");
 }
@@ -57,7 +58,157 @@ function shuffleArray(array) {
 }
 function randFrom(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 
-/* ---------------- SUNSCREEN / SKINCARE MODE ---------------- */
+/* ---------------- MAIN INIT ---------------- */
+window.addEventListener("DOMContentLoaded", async () => {
+  
+  /* =========================================
+     🛑 CRITICAL: PASSWORD LOGIC (RUNS FIRST)
+     ========================================= */
+  const passContainer = document.getElementById("passcodeControl");
+  const passInput = document.getElementById("passcodeInput");
+  const passBtn = document.getElementById("passcodeBtn");
+  const passMsg = document.getElementById("passcodeError");
+  const startBtn = document.getElementById("introStartBtn");
+
+  if(passBtn && passInput && startBtn){
+     // Define the check function
+     const performUnlock = () => {
+        const userInput = passInput.value.trim();
+        const configPass = (config.passcode || "1111").toString();
+        
+        // Check: Either matches config OR strictly "1111" (Fail-safe)
+        if(userInput === configPass || userInput === "1111"){
+           // SUCCESS
+           passContainer.classList.add("hidden"); // Hide password box
+           startBtn.classList.remove("hidden");   // Show Start Button
+           passMsg.classList.add("hidden");       // Hide error msg
+        } else {
+           // FAIL
+           passMsg.classList.remove("hidden");
+           passInput.classList.add("error-shake");
+           setTimeout(()=> passInput.classList.remove("error-shake"), 300);
+        }
+     };
+
+     // Attach Listeners
+     passBtn.addEventListener("click", performUnlock);
+     passInput.addEventListener("keypress", (e) => {
+        if(e.key === "Enter") performUnlock();
+     });
+  }
+  /* =========================================
+     END PASSWORD LOGIC
+     ========================================= */
+
+  setupModeToggle(); 
+  setupTimedPopup();
+
+  // Music toggle
+  const musicToggle = document.getElementById("musicToggle");
+  if(musicToggle){
+    musicToggle.addEventListener("click", ()=>{
+      if(isYtPlaying()){ stopYtMusic(); musicToggle.textContent = "🎵 Play Music"; }
+      else{ playYtMusic(); musicToggle.textContent = "🔇 Stop Music"; }
+    });
+  }
+  
+  // Start Over
+  const startOverBtn = document.getElementById("startOverBtn");
+  if(startOverBtn){ startOverBtn.addEventListener("click", ()=>{ location.reload(); }); }
+
+  // Title
+  const title = document.getElementById("valentineTitle");
+  if(title){
+    title.textContent = `${config.valentineName || "My Love"}, my love...`;
+    title.style.cursor = "pointer";
+    title.addEventListener("click", ()=> alert("💌 Secret unlocked:\nYou are my favorite human. Always."));
+  }
+
+  // Set Config Texts
+  document.getElementById("question1Text").textContent = config.questions?.first?.text || "Do you like me?";
+  document.getElementById("yesBtn1").textContent = config.questions?.first?.yesBtn || "Yes";
+  document.getElementById("noBtn1").textContent = config.questions?.first?.noBtn || "No";
+
+  document.getElementById("question2Text").textContent = config.questions?.second?.text || "How much do you love me?";
+  document.getElementById("startText").textContent = config.questions?.second?.startText || "This much!";
+  document.getElementById("nextBtn").textContent = config.questions?.second?.nextBtn || "Next ❤️";
+
+  document.getElementById("question3Text").textContent = config.questions?.third?.text || "Will you be my Valentine?";
+  document.getElementById("yesBtn3").textContent = config.questions?.third?.yesBtn || "Yes!";
+  document.getElementById("noBtn3").textContent = config.questions?.third?.noBtn || "No";
+
+  createFloating(); setupLoveMeter(); setupExtras(); setupFutureOneAtATime();
+  const fw = setupFireworks();
+
+  // START BUTTON LOGIC
+  if(startBtn){
+    startBtn.addEventListener("click", async ()=>{
+      const overlay = document.getElementById("introOverlay");
+      overlay.style.display = "none";
+      playYtMusic(); 
+      if(musicToggle) musicToggle.textContent = "🔇 Stop Music";
+      await runChatSim(); 
+      await runIncomingCall();
+      showOnly("question1");
+    });
+  }
+
+  // Question 1 Flow
+  const yes1 = document.getElementById("yesBtn1");
+  const no1 = document.getElementById("noBtn1");
+  const warn1 = document.getElementById("systemWarning");
+  yes1.addEventListener("click", ()=> showOnly("captcha"));
+  demonNoStartsNice(no1, yes1, warn1);
+  document.getElementById("secretAnswerBtn").addEventListener("click", ()=>{ alert(config.questions?.first?.secretAnswer || "I love you ❤️"); });
+
+  // Captcha Flow
+  setupCaptcha(()=> showOnly("question2"));
+  
+  // Q2 -> Scan Flow
+  document.getElementById("nextBtn").addEventListener("click", ()=>{ runCompatScan(async ()=>{ await runAiPrediction(()=> showOnly("question3")); }); });
+
+  // Q3 Flow
+  const yes3 = document.getElementById("yesBtn3");
+  const no3 = document.getElementById("noBtn3");
+  const warn3 = document.getElementById("systemWarning3");
+  demonNoStartsNice(no3, yes3, warn3);
+  yes3.addEventListener("click", ()=>{
+    cameraFlash();
+    showLockScreenThen(()=>{
+      showOnly("celebration");
+      const ct = document.getElementById("celebrationTitle");
+      const cm = document.getElementById("celebrationMessage");
+      const ce = document.getElementById("celebrationEmojis");
+      ct.textContent = config.celebration?.title || "Yay! 🎉";
+      ce.textContent = config.celebration?.emojis || "🎁💖🤗💝💋❤️💕";
+      typeText(cm, config.celebration?.message || "Now come get your gift… 💋", 32);
+      if(fw) fw.fire();
+    });
+  });
+
+  // Navigation Listeners
+  const seeTl = document.getElementById("seeTimelineBtn");
+  const tl = document.getElementById("timeline");
+  if(seeTl && tl){
+    seeTl.addEventListener("click", ()=>{ tl.classList.remove("hidden"); tl.scrollIntoView({ behavior: "smooth", block: "start" }); });
+  }
+
+  const openExtras = document.getElementById("openExtrasBtn");
+  const extras = document.getElementById("extras");
+  const back = document.getElementById("backFromExtras");
+  if(openExtras && extras){
+    openExtras.addEventListener("click", ()=>{ extras.classList.remove("hidden"); extras.scrollIntoView({ behavior: "smooth", block: "start" }); });
+  }
+  if(back && extras){
+    back.addEventListener("click", ()=>{ extras.classList.add("hidden"); showOnly("celebration"); });
+  }
+});
+
+/* ------------------------------------------------
+   HELPER FUNCTIONS (Global Scope)
+   ------------------------------------------------ */
+
+/* SUNSCREEN / SKINCARE MODE */
 function applyAutoModeIfNoPreference(){
   const saved = localStorage.getItem("val_mode");
   if(saved) return;
@@ -65,7 +216,6 @@ function applyAutoModeIfNoPreference(){
   const night = (h >= 20 || h < 6);
   localStorage.setItem("val_mode", night ? "skincare" : "sunscreen");
 }
-
 function applyMode(){
   const modeBtn = document.getElementById("modeToggle");
   const mode = localStorage.getItem("val_mode") || "sunscreen";
@@ -74,7 +224,6 @@ function applyMode(){
     modeBtn.textContent = mode === "skincare" ? "🌙 Night Skincare Mode" : "🧴 Sunscreen Mode";
   }
 }
-
 function setupModeToggle(){
   applyAutoModeIfNoPreference();
   applyMode();
@@ -88,25 +237,7 @@ function setupModeToggle(){
   });
 }
 
-/* ---------------- YOUTUBE MUSIC ---------------- */
-let ytPlayer = null;
-let ytReady = false;
-let ytWantsPlay = false;
-
-window.onYouTubeIframeAPIReady = function(){
-  ytPlayer = new YT.Player("ytMusic", {
-    videoId: "QGLHe7K0CQQ",
-    playerVars: { autoplay: 0, controls: 0, loop: 1, playlist: "QGLHe7K0CQQ", modestbranding: 1, rel: 0 },
-    events: {
-      onReady: () => {
-        ytReady = true;
-        try { ytPlayer.setVolume(70); } catch(e) {}
-        if (ytWantsPlay) { ytWantsPlay = false; playYtMusic(); }
-      }
-    }
-  });
-};
-
+/* YOUTUBE MUSIC */
 function playYtMusic(){
   if(!ytReady || !ytPlayer) { ytWantsPlay = true; return; }
   try{ ytPlayer.unMute(); ytPlayer.setVolume(70); ytPlayer.playVideo(); }catch(e){}
@@ -119,7 +250,7 @@ function isYtPlaying(){
   try{ return ytPlayer && ytReady && ytPlayer.getPlayerState && ytPlayer.getPlayerState() === 1; }catch(e){ return false; }
 }
 
-/* ---------------- FLOATING EMOJIS ---------------- */
+/* FLOATING EMOJIS */
 function createFloating(){
   const container = document.querySelector(".floating-elements");
   if(!container) return;
@@ -146,7 +277,7 @@ function createFloating(){
   });
 }
 
-/* ---------------- CAMERA FLASH ---------------- */
+/* CAMERA FLASH */
 function cameraFlash(){
   const f = document.getElementById("flashOverlay");
   if(f){
@@ -160,7 +291,7 @@ function cameraFlash(){
   setTimeout(()=> document.body.classList.remove("shake"), 260);
 }
 
-/* ---------------- LIE DETECTOR ---------------- */
+/* LIE DETECTOR */
 let lieBusy = false;
 async function lieDetectorScan(message){
   if(lieBusy) return;
@@ -179,7 +310,7 @@ async function lieDetectorScan(message){
   lieBusy = false;
 }
 
-/* ---------------- FAKE CHAT ---------------- */
+/* FAKE CHAT */
 async function runChatSim(){
   const chat = document.getElementById("chatSim");
   const linesBox = document.getElementById("chatLines");
@@ -205,7 +336,7 @@ async function runChatSim(){
   });
 }
 
-/* ---------------- INCOMING CALL ---------------- */
+/* INCOMING CALL */
 function runIncomingCall(){
   const scr = document.getElementById("incomingCall");
   const accept = document.getElementById("acceptCall");
@@ -218,7 +349,7 @@ function runIncomingCall(){
   });
 }
 
-/* ---------------- LOVE METER ---------------- */
+/* LOVE METER */
 function setupLoveMeter(){
   const loveMeter = document.getElementById("loveMeter");
   const loveValue = document.getElementById("loveValue");
@@ -266,7 +397,7 @@ function setupLoveMeter(){
   });
 }
 
-/* ---------------- CAPTCHA ---------------- */
+/* CAPTCHA */
 function setupCaptcha(onPass){
   const check = document.getElementById("captchaCheck");
   const btn = document.getElementById("captchaContinue");
@@ -279,7 +410,7 @@ function setupCaptcha(onPass){
   });
 }
 
-/* ---------------- COMPAT SCAN ---------------- */
+/* COMPAT SCAN */
 function runCompatScan(next){
   const fill = document.getElementById("scanFill");
   const txt = document.getElementById("scanText");
@@ -295,7 +426,7 @@ function runCompatScan(next){
   }, 80);
 }
 
-/* ---------------- AI PREDICTION ---------------- */
+/* AI PREDICTION */
 async function runAiPrediction(next){
   const box = document.getElementById("aiBox");
   const btn = document.getElementById("aiContinue");
@@ -307,7 +438,7 @@ async function runAiPrediction(next){
   btn.onclick = () => next();
 }
 
-/* ---------------- NO BUTTON PRANK ---------------- */
+/* NO BUTTON PRANK */
 function demonNoStartsNice(noBtn, yesBtn, warnEl){
   if(!noBtn || !yesBtn) return;
   let attempts = 0;
@@ -338,7 +469,7 @@ function demonNoStartsNice(noBtn, yesBtn, warnEl){
   noBtn.addEventListener("touchstart", onTry, { passive:false });
 }
 
-/* ---------------- FIREWORKS ---------------- */
+/* FIREWORKS */
 function setupFireworks(){
   const canvas = document.getElementById("fireworksCanvas");
   if(!canvas) return null;
@@ -377,7 +508,7 @@ function setupFireworks(){
   };
 }
 
-/* ---------------- LOCK SCREEN ---------------- */
+/* LOCK SCREEN */
 function showLockScreenThen(next){
   const ls = document.getElementById("lockScreen");
   if(!ls){ next(); return; }
@@ -385,7 +516,7 @@ function showLockScreenThen(next){
   setTimeout(()=>{ ls.classList.add("hidden"); next(); }, 1500);
 }
 
-/* ---------------- TIMED POPUP ---------------- */
+/* TIMED POPUP */
 function setupTimedPopup(){
   setTimeout(()=>{
     const overlay = document.getElementById("introOverlay");
@@ -393,7 +524,7 @@ function setupTimedPopup(){
   }, 20000);
 }
 
-/* ---------------- EXTRAS + NEW FEATURES ---------------- */
+/* EXTRAS */
 function setupExtras(){
   const whyBtn = document.getElementById("whyLoveBtn");
   const whyText = document.getElementById("whyLoveText");
@@ -405,7 +536,7 @@ function setupExtras(){
 
   let hugCount = 0;
   
-  // Why Love - Playlist Mode
+  // Why Love
   let reasonPool = []; let reasonIndex = 0;
   if(whyBtn && whyText){
     reasonPool = (config.whyLoveReasons || ["You are amazing"]).slice();
@@ -418,7 +549,7 @@ function setupExtras(){
     });
   }
 
-  // Hug Counter - 30 options
+  // Hug Counter
   if(hugBtn && hugCountEl && hugMsg){
     hugBtn.addEventListener("click", ()=>{
       hugCount++;
@@ -446,9 +577,9 @@ function setupExtras(){
   if(shuffle) shuffle.addEventListener("click", renderPromises);
   renderPromises();
 
-  /* --- NEW FEATURES LOGIC --- */
+  /* --- EXTRAS FEATURES LOGIC --- */
 
-  // 1. Coupons (INFINITY LOGIC ADDED HERE)
+  // 1. Coupons
   const openCoupons = document.getElementById("openCouponsBtn");
   const closeCoupons = document.getElementById("closeCouponsBtn");
   const couponsOverlay = document.getElementById("couponsOverlay");
@@ -457,27 +588,20 @@ function setupExtras(){
   if(openCoupons && couponsOverlay){
     openCoupons.addEventListener("click", ()=>{
       couponsOverlay.classList.remove("hidden");
-      // Render coupons if empty
       if(couponsGrid.innerHTML === ""){
         (config.loveCoupons || []).forEach(c => {
            const el = document.createElement("div");
            el.className = "coupon-ticket";
            el.innerHTML = `<div class="coupon-title">${c.text}</div><div class="coupon-desc">${c.desc}</div>`;
-           
            el.onclick = () => {
-             // If already redeemed, just remind them it's infinity
              if(el.classList.contains("redeemed")) {
                 alert("Don't worry, you can use this forever! ♾️💖");
                 return;
              }
-             
-             // First click interaction
              if(confirm("Redeem this coupon?")){
-               // Playful prank alert
                alert("Processing... wait... 🤔");
                setTimeout(() => {
                    alert("Just kidding! You have INFINITY of these! 😜♾️");
-                   // Visual change to GOLD/INFINITY state
                    el.classList.add("redeemed");
                    el.querySelector(".coupon-title").textContent += " (∞)";
                    el.querySelector(".coupon-desc").textContent = "Unlimited use for you 💗";
@@ -508,14 +632,13 @@ function setupExtras(){
         resetGame();
     });
     closeGame.addEventListener("click", ()=> gameOverlay.classList.add("hidden"));
-    
     startBtn.addEventListener("click", startGame);
   }
 
   function resetGame(){
     score = 0; timeLeft = 15;
     scoreEl.textContent = "0"; timerEl.textContent = "15";
-    gameMsg.textContent = "Catch 5 Hearts! 💖"; // Updated text
+    gameMsg.textContent = "Catch 5 Hearts! 💖";
     startBtn.classList.remove("hidden");
     closeGame.classList.add("hidden");
     gameArea.innerHTML = "";
@@ -524,13 +647,11 @@ function setupExtras(){
   function startGame(){
     startBtn.classList.add("hidden");
     score = 0; timeLeft = 15;
-    
     gameInterval = setInterval(()=>{
       timeLeft--;
       timerEl.textContent = timeLeft;
       if(timeLeft <= 0) endGame();
     }, 1000);
-
     spawnInterval = setInterval(spawnHeart, 600);
   }
 
@@ -538,19 +659,14 @@ function setupExtras(){
     const h = document.createElement("div");
     h.textContent = "💖";
     h.className = "game-heart-item";
-    // Random position
     h.style.left = Math.random() * 80 + 10 + "%";
-    
     h.addEventListener("click", ()=>{
       score++;
       scoreEl.textContent = score;
       h.remove();
-      // WIN CONDITION: 5 HEARTS
       if(score >= 5) endGame(true);
     });
-    
     gameArea.appendChild(h);
-    // Cleanup fallen hearts after animation ends
     setTimeout(()=> { if(h.parentNode) h.remove(); }, 4100);
   }
 
@@ -559,13 +675,12 @@ function setupExtras(){
     clearInterval(spawnInterval);
     gameArea.innerHTML = "";
     closeGame.classList.remove("hidden");
-    
     if(win){
       gameMsg.textContent = "YOU WON! 🎉 Certificate Unlocked!";
       setTimeout(()=> {
          gameOverlay.classList.add("hidden");
          const openCertBtn = document.getElementById("openCertBtn");
-         if(openCertBtn) openCertBtn.click(); // Auto open cert
+         if(openCertBtn) openCertBtn.click();
       }, 1500);
     } else {
       gameMsg.textContent = "Game Over! Try again? 🥺";
@@ -578,7 +693,6 @@ function setupExtras(){
   const openCert = document.getElementById("openCertBtn");
   const certOverlay = document.getElementById("certificateOverlay");
   const closeCert = document.getElementById("closeCertBtn");
-  
   if(openCert && certOverlay){
     openCert.addEventListener("click", ()=>{
        certOverlay.classList.remove("hidden");
@@ -590,150 +704,4 @@ function setupExtras(){
     });
     closeCert.addEventListener("click", ()=> certOverlay.classList.add("hidden"));
   }
-
-  /* ---------------- PASSWORD CHECK LOGIC (FIXED) ---------------- */
-  const passContainer = document.getElementById("passcodeControl");
-  const passInput = document.getElementById("passcodeInput");
-  const passBtn = document.getElementById("passcodeBtn");
-  const passMsg = document.getElementById("passcodeError");
-  const startBtn = document.getElementById("introStartBtn");
-
-  if(passBtn && passInput && startBtn){
-     const checkPass = () => {
-        // --- FORCE FIX START ---
-        // We trim the input so "1111 " works as "1111".
-        // We treat everything as string so 1111 == "1111".
-        const val = passInput.value.trim().toString();
-        
-        // HARDCODED OVERRIDE:
-        // This ensures "1111" ALWAYS works, even if config.js is broken.
-        const correctVal = "1111"; 
-        
-        if(val === correctVal){
-           // Unlock
-           passContainer.classList.add("hidden");
-           startBtn.classList.remove("hidden");
-           passMsg.classList.add("hidden");
-        } else {
-           // Wrong password
-           passMsg.classList.remove("hidden");
-           passInput.classList.add("error-shake");
-           setTimeout(()=> passInput.classList.remove("error-shake"), 300);
-        }
-        // --- FORCE FIX END ---
-     };
-
-     passBtn.addEventListener("click", checkPass);
-     passInput.addEventListener("keypress", (e) => {
-        if(e.key === "Enter") checkPass();
-     });
-  }
 }
-
-/* ---------------- FUTURE TIMELINE ---------------- */
-function setupFutureOneAtATime(){
-  const btn = document.getElementById("genFutureBtn");
-  const out = document.getElementById("futureOne");
-  if(!btn || !out) return;
-  const seq = config.futureTimelineOrdered || [];
-  let idx = 0;
-  btn.addEventListener("click", ()=>{
-    if(seq.length === 0) return;
-    out.textContent = seq[idx];
-    idx = Math.min(seq.length - 1, idx + 1);
-    if(idx === seq.length - 1 && out.textContent === seq[seq.length - 1]){
-      btn.textContent = "Done 😌💘"; btn.disabled = true; btn.style.opacity = "0.75"; btn.style.cursor = "not-allowed";
-    }
-  });
-}
-
-/* ---------------- INIT ---------------- */
-window.addEventListener("DOMContentLoaded", async () => {
-  setupModeToggle(); setupTimedPopup();
-  const musicToggle = document.getElementById("musicToggle");
-  if(musicToggle){
-    musicToggle.addEventListener("click", ()=>{
-      if(isYtPlaying()){ stopYtMusic(); musicToggle.textContent = "🎵 Play Music"; }
-      else{ playYtMusic(); musicToggle.textContent = "🔇 Stop Music"; }
-    });
-  }
-  const startOverBtn = document.getElementById("startOverBtn");
-  if(startOverBtn){ startOverBtn.addEventListener("click", ()=>{ location.reload(); }); }
-
-  const title = document.getElementById("valentineTitle");
-  if(title){
-    title.textContent = `${config.valentineName || "My Love"}, my love...`;
-    title.style.cursor = "pointer";
-    title.addEventListener("click", ()=> alert("💌 Secret unlocked:\nYou are my favorite human. Always."));
-  }
-
-  document.getElementById("question1Text").textContent = config.questions?.first?.text || "Do you like me?";
-  document.getElementById("yesBtn1").textContent = config.questions?.first?.yesBtn || "Yes";
-  document.getElementById("noBtn1").textContent = config.questions?.first?.noBtn || "No";
-
-  document.getElementById("question2Text").textContent = config.questions?.second?.text || "How much do you love me?";
-  document.getElementById("startText").textContent = config.questions?.second?.startText || "This much!";
-  document.getElementById("nextBtn").textContent = config.questions?.second?.nextBtn || "Next ❤️";
-
-  document.getElementById("question3Text").textContent = config.questions?.third?.text || "Will you be my Valentine?";
-  document.getElementById("yesBtn3").textContent = config.questions?.third?.yesBtn || "Yes!";
-  document.getElementById("noBtn3").textContent = config.questions?.third?.noBtn || "No";
-
-  createFloating(); setupLoveMeter(); setupExtras(); setupFutureOneAtATime();
-  const fw = setupFireworks();
-
-  const startBtn = document.getElementById("introStartBtn");
-  const overlay = document.getElementById("introOverlay");
-  if(startBtn){
-    startBtn.addEventListener("click", async ()=>{
-      overlay.style.display = "none";
-      playYtMusic(); if(musicToggle) musicToggle.textContent = "🔇 Stop Music";
-      await runChatSim(); await runIncomingCall();
-      showOnly("question1");
-    });
-  }
-
-  const yes1 = document.getElementById("yesBtn1");
-  const no1 = document.getElementById("noBtn1");
-  const warn1 = document.getElementById("systemWarning");
-  yes1.addEventListener("click", ()=> showOnly("captcha"));
-  demonNoStartsNice(no1, yes1, warn1);
-  document.getElementById("secretAnswerBtn").addEventListener("click", ()=>{ alert(config.questions?.first?.secretAnswer || "I love you ❤️"); });
-
-  setupCaptcha(()=> showOnly("question2"));
-  document.getElementById("nextBtn").addEventListener("click", ()=>{ runCompatScan(async ()=>{ await runAiPrediction(()=> showOnly("question3")); }); });
-
-  const yes3 = document.getElementById("yesBtn3");
-  const no3 = document.getElementById("noBtn3");
-  const warn3 = document.getElementById("systemWarning3");
-  demonNoStartsNice(no3, yes3, warn3);
-  yes3.addEventListener("click", ()=>{
-    cameraFlash();
-    showLockScreenThen(()=>{
-      showOnly("celebration");
-      const ct = document.getElementById("celebrationTitle");
-      const cm = document.getElementById("celebrationMessage");
-      const ce = document.getElementById("celebrationEmojis");
-      ct.textContent = config.celebration?.title || "Yay! 🎉";
-      ce.textContent = config.celebration?.emojis || "🎁💖🤗💝💋❤️💕";
-      typeText(cm, config.celebration?.message || "Now come get your gift… 💋", 32);
-      if(fw) fw.fire();
-    });
-  });
-
-  const seeTl = document.getElementById("seeTimelineBtn");
-  const tl = document.getElementById("timeline");
-  if(seeTl && tl){
-    seeTl.addEventListener("click", ()=>{ tl.classList.remove("hidden"); tl.scrollIntoView({ behavior: "smooth", block: "start" }); });
-  }
-
-  const openExtras = document.getElementById("openExtrasBtn");
-  const extras = document.getElementById("extras");
-  const back = document.getElementById("backFromExtras");
-  if(openExtras && extras){
-    openExtras.addEventListener("click", ()=>{ extras.classList.remove("hidden"); extras.scrollIntoView({ behavior: "smooth", block: "start" }); });
-  }
-  if(back && extras){
-    back.addEventListener("click", ()=>{ extras.classList.add("hidden"); showOnly("celebration"); });
-  }
-});
