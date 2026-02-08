@@ -585,7 +585,7 @@ function setupExtras(){
     closeCert.addEventListener("click", ()=> certOverlay.classList.add("hidden"));
   }
 
-  /* ---------------- PASSWORD CHECK LOGIC (NEW) ---------------- */
+  /* ---------------- PASSWORD CHECK LOGIC (FIXED) ---------------- */
   const passContainer = document.getElementById("passcodeControl");
   const passInput = document.getElementById("passcodeInput");
   const passBtn = document.getElementById("passcodeBtn");
@@ -594,9 +594,12 @@ function setupExtras(){
 
   if(passBtn && passInput && startBtn){
      const checkPass = () => {
-        const val = passInput.value.trim();
-        // Check against config
-        if(val === (config.passcode || "1402")){
+        // Convert both input and config password to Strings for safe comparison
+        const val = passInput.value.trim().toString();
+        // Fallback to "1402" if config is missing
+        const correctVal = (config.passcode || "1402").toString(); 
+        
+        if(val === correctVal){
            // Unlock
            passContainer.classList.add("hidden");
            startBtn.classList.remove("hidden");
