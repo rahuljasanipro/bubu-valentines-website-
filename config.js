@@ -237,7 +237,7 @@ const CONFIG = {
 
   // 📊 RELATIONSHIP STATS
   relStats: {
-    days: "800+ Days",
+    days: "95+ Days",
     fightsWon: "99% (by You)",
     trips: "1",
     kisses: "Infinity 💋"
