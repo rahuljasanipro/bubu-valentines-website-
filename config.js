@@ -15,7 +15,7 @@ const CONFIG = {
       secretAnswer: "I don't like you… I LOVE YOU ❤️"
     },
     second: {
-      text: "How much do you love me? 😳",
+      text: "How much do you love me? 😳 (drag it… if you can 😈)",
       startText: "This much!",
       nextBtn: "Next ❤️"
     },
@@ -45,24 +45,7 @@ const CONFIG = {
     "Because you laugh at my dumb jokes 😄",
     "Because you make ordinary days special ✨",
     "Because you’re cute even when angry 😭💗",
-    "Because your skincare routine could be a TED Talk 😄🧴",
-    "Because you glow differently… always 😭✨",
     "Because you’re YOU. That’s enough 💘"
-  ],
-
-  hugMessages: [
-    "Warm hug 🤗",
-    "Tight hug 😌",
-    "Head on shoulder hug 🫶",
-    "Banaras hug 🛕🤗",
-    "Sorry hug 😭",
-    "Skincare-safe hug (no face touch) 😄🧴",
-    "Movie night hug 🎬🤗",
-    "Long drive hug 🚗🤗",
-    "Chef kiss hug 💋",
-    "Infinity hug 🚀🤗",
-    "Ok now you’re crushing ribs 😭🤗",
-    "Final boss hug unlocked 🏆🤗"
   ],
 
   promises: [
@@ -76,19 +59,20 @@ const CONFIG = {
     "I promise to bring snacks 🧁",
     "I promise to listen properly 👂",
     "I promise to love you louder 💘",
-    "I promise to respect sheet mask time 🧴",
-    "I promise to remind you: SPF is non-negotiable ☀️🧴",
-    "I promise to never say no to gargle again 😂"
+    "I promise to never say no to gargle again 😂",
+    "I promise movie nights 🎬"
   ],
 
-  futureTemplates: [
-    "2026 — Another trip together 🌍",
-    "2026 — A thousand hugs unlocked 🤗",
+  // Ordered, one-at-a-time timeline from 2026 → 2060
+  futureTimelineOrdered: [
+    "2026 — More trips together 🌍",
     "2027 — Still flirting like day one 😌",
-    "2028 — Banaras 2.0 confirmed 🛕",
-    "2030 — Still choosing you, always 💗",
+    "2028 — Marriage by 2028 😤💍",
+    "2029 — First BIG vacation together ✈️",
+    "2032 — Still choosing you, always 💗",
     "2035 — Anniversary celebrations on max 🎉",
-    "2040 — Still laughing at the same jokes 😄",
+    "2040 — Banaras 2.0 (and 3.0) confirmed 🛕",
+    "2045 — Still laughing at the same jokes 😄",
     "2050 — Love level: infinite 🚀",
     "2060 — Still together. Still us 💘"
   ],
@@ -96,12 +80,11 @@ const CONFIG = {
   aiPredictionLines: [
     "Initializing romantic intelligence…",
     "Scanning: Banaras memories ✅",
-    "Scanning: Skincare obsession 🧴✅",
-    "Scanning: Relatives trauma 😂✅",
+    "Scanning: Gargle incident trauma 😂✅",
     "Calculating compatibility…",
     "Result: 1000% match 💞",
-    "Recommended action: Hug immediately 🤗",
-    "Warning: separation probability = 0.0000% 😈"
+    "Recommended action: hug immediately 🤗",
+    "Warning: separation probability = 0.0001% 😈"
   ],
 
   colors: {
