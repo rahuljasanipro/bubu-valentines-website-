@@ -17,7 +17,13 @@
       <h1 class="intro-title">Hey Bubu 👀💗</h1>
       <p class="intro-subtitle">Before you enter… promise you’ll smile 😌</p>
 
-      <button id="introStartBtn" class="btn btn-next" type="button">Start 💖</button>
+      <div id="passcodeControl">
+        <input type="password" id="passcodeInput" placeholder="Enter Password..." />
+        <button id="passcodeBtn" class="btn btn-next">Unlock 🔐</button>
+        <p id="passcodeError" class="passcode-error hidden">Wrong password 😜</p>
+      </div>
+
+      <button id="introStartBtn" class="btn btn-next hidden" type="button">Start 💖</button>
 
       <p class="intro-hint">Psst: there’s a hidden surprise inside 👀</p>
     </div>
