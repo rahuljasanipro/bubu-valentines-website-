@@ -71,7 +71,7 @@ body{
   right: 14px;
   display:flex;
   gap: 10px;
-  z-index: 11000; /* FIXED: Increased to be ABOVE the intro screen (was 9999) */
+  z-index: 11000; /* FIXED: Above intro */
 }
 
 .chip{
@@ -468,6 +468,7 @@ body{
     width: min(600px, 90vw);
     border-radius: 4px;
     box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+    color: #222; /* Ensure black text in day mode */
 }
 .cert-header{ font-size: 28px; font-weight: 900; color: #d4af37; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
 .cert-body{ font-size: 20px; line-height: 1.6; margin-bottom: 30px; font-style: italic; font-family: "Georgia", serif; }
@@ -491,6 +492,7 @@ body{
     text-align: center;
     max-height: 80vh;
     overflow-y: auto;
+    color: #222; /* Default text color */
 }
 .coupons-grid{
     display: flex; flex-direction: column; gap: 12px;
@@ -503,6 +505,7 @@ body{
     cursor: pointer;
     transition: 0.2s;
     text-align: left;
+    color: #222;
 }
 .coupon-ticket:hover{ background: #fff5f5; border-color: var(--btn); }
 
@@ -514,6 +517,7 @@ body{
     opacity: 1; /* Do not fade out */
     text-decoration: none; /* No strikethrough */
     transform: scale(1.02);
+    color: #444; /* Dark text for readability on gold */
 }
 
 .coupon-title{ font-weight: 900; font-size: 16px; margin-bottom: 4px; }
@@ -630,12 +634,34 @@ body.skincare .promise-tile{
   background: rgba(255,255,255,0.08);
   color: #f2f2f2;
 }
-body.skincare .coupon-ticket{
-   background: rgba(255,255,255,0.08);
-   border-color: #555;
+
+/* FIX: Extras in Night Mode */
+body.skincare .coupons-card,
+body.skincare .game-ui,
+body.skincare .certificate-frame {
+   background: #1e1e24;
    color: #f2f2f2;
+   border-color: #444;
 }
-body.skincare .coupon-ticket.redeemed{
+
+/* FIX: Coupon Tickets in Night Mode */
+body.skincare .coupon-ticket {
+   background: rgba(255,255,255,0.05);
+   border-color: #555;
+   color: #ccc;
+}
+body.skincare .coupon-ticket:hover {
+   background: rgba(255,255,255,0.1);
+}
+/* Gold redeemed coupon still looks gold in night mode */
+body.skincare .coupon-ticket.redeemed {
    background: #ffd700;
    color: #222;
+   border-color: #daa520;
+}
+
+/* FIX: Certificate in Night Mode */
+body.skincare .certificate-frame {
+   background-image: none; /* Remove pattern */
+   box-shadow: 0 0 40px rgba(212, 175, 55, 0.2);
 }
